@@ -3,32 +3,102 @@
  * Will store: card on top of deck, their own hand, how many cards the opponent has, their own name
  */
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-public class Player {
-	private ArrayList<Card> hand = new ArrayList<Card>();
-	static Card onStack;
-	
-
-	public Player (String host, int port, String name, UnoGUI gui) {
-
-	}
-
-	public Card drawCard() {
-		return null;
-	}
-
-	public void playCard(int number, char color) {
-		// check color first
-	}
-
-	public void receiveCard(Card card) {
-
-	}
-
-
-	
-	
-}
+ import java.io.*;
+ import java.net.*;
+ import java.util.*;
+ 
+ public class Player {
+	 private ArrayList<Card> hand = new ArrayList<Card>();
+	 private static Card onStack;
+	 private Socket sock;
+	 private String name;
+	 private UnoGUI gui;
+ 
+	 public Player (String host, int port, String name, UnoGUI gui) {
+		 this.name = name;
+		 this.gui = gui;
+		 
+		 try {
+			 sock = new Socket(host, port);
+		 }
+		 catch (Exception e) {
+			 // error pop-up/message
+		 }
+ 
+		 // start listening to the server
+		 (new listeningThread(sock)).start();
+	 }
+ 
+	 public void drawCard() {
+		 // requests a card from the server
+	 }
+ 
+	 // triggered by the GUI
+	 public void playCard(Card card) {
+		 int cardNum = card.getNumber();
+		 char cardCol = card.getColor();
+ 
+		 // wild cards always get played
+		 if (cardCol == 's') {
+			 // send to the server
+		 }
+ 
+		 // if the colors match
+		 else if (cardCol == onStack.getColor()) {
+			 // send to the server
+		 }
+ 
+		 // if the numbers match
+		 else if (cardNum == onStack.getNumber()) {
+			 // send to the server
+		 }
+ 
+		 else {
+			 // pop-up telling the player that card isn't playable?
+		 }
+	 }
+ 
+	 public void receiveCard(Card card) {
+		 hand.add(card);
+	 }
+ 
+	 private class listeningThread extends Thread {
+		 private Socket sock;
+		 private ObjectInputStream objectFromServer;
+		 private BufferedReader br;
+		 private ObjectOutputStream objectToServer;
+		 private PrintWriter pw;
+		 
+		 public listeningThread (Socket sock) {
+			 this.sock = sock;
+ 
+			 // set up the i/o stream readers
+			 try {
+				 // read FROM the server
+				 objectFromServer = new ObjectInputStream(sock.getInputStream());
+				 br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+ 
+				 // write TO the server
+				 
+			 }
+			 catch (Exception e) {
+				 // error pop-up/message
+			 }
+		 }
+ 
+		 @Override
+		 public void run() {
+			 // whatever it does with the things the server is saying/sending
+			 try {
+				 while(true){ 
+ 
+				 }
+			 }
+			 catch (Exception e) {
+				 // error pop-up/message
+			 }
+		 }
+	 }
+	 
+ }
+ 
