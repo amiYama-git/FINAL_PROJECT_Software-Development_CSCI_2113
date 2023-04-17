@@ -3,6 +3,7 @@
  * Will store: card on top of deck, their own hand, how many cards the opponent has, their own name
  */
 
+
  import java.io.*;
  import java.net.*;
  import java.util.*;
@@ -57,10 +58,33 @@
 			 // pop-up telling the player that card isn't playable?
 		 }
 	 }
+   
+   // Or, since the GUI already has access to the ArrayList in order to present it, it can just send the number in the array that is clicked?
+	public void playCard(int played) {
+		if (canPlay(hand.get(played)) == true) {
+			// Sends the Card to the Network (Recieved back from Network to update top of Stack)
+		} else {
+			// GUI popup says "You can't do that!!!"
+		}
+	}
  
 	 public void receiveCard(Card card) {
 		 hand.add(card);
 	 }
+   
+   // Updates the Stack with the Card Recieved. 
+	public void updateStack(Card card) {
+		onStack = card;
+	}
+  
+  	// If they press the Uno Button on the GUI
+	public void uno() {
+		if (hand.size() == 1) {
+			// Reflected on GUI
+		} else {
+			// Wah Wah
+		}
+	}
  
 	 private class listeningThread extends Thread {
 		 private Socket sock;
@@ -101,4 +125,3 @@
 	 }
 	 
  }
- 
