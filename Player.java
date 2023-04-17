@@ -45,12 +45,12 @@
 		 }
  
 		 // if the colors match
-		 else if (cardCol == onStack.getColor()) {
+		 else if (cardCol == onStack.getCol()) {
 			 // send to the server
 		 }
  
 		 // if the numbers match
-		 else if (cardNum == onStack.getNumber()) {
+		 else if (cardNum == onStack.getNum()) {
 			 // send to the server
 		 }
  
