@@ -8,8 +8,7 @@ import java.util.*;
  */
 
 public class UnoServer {
-	private ArrayList<Card> baseDeck = new ArrayList<Card>();
-	private ArrayList<Card> deckInPlay = new ArrayList<Card>();
+	
 
 	private ServerSocket server;
 	
