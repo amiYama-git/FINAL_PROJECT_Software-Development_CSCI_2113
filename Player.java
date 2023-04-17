@@ -51,7 +51,7 @@ public class Player {
  
 		// if the colors match
 		else if (color == onStack.getCol()) {
-			// check to see if it's a +2
+			// check to see if it's a +2, skip, or rotate
 			// send to the server
 			// remove from hand
 			return true;
