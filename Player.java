@@ -51,6 +51,7 @@ public class Player {
  
 		// if the colors match
 		else if (color == onStack.getCol()) {
+			// check to see if it's a +2
 			// send to the server
 			// remove from hand
 			return true;
@@ -106,6 +107,7 @@ public class Player {
  
 				// write TO the server
 				objectToServer = new ObjectOutputStream(sock.getOutputStream());
+				pw = new PrintWriter(sock.getOutputStream());
 				 
 			}
 			catch (Exception e) {
