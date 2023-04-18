@@ -81,12 +81,13 @@ public class Player {
 	}
   
   	// If they press the Uno Button on the GUI
-	public void uno() {
+	public boolean uno() {
 		if (hand.size() == 1) {
 			// Reflected on GUI
-		} else {
-			// Wah Wah
-		}
+			return true;
+		} 
+		// Wah Wah
+		return False; 
 	}
  
 	private class listeningThread extends Thread {
