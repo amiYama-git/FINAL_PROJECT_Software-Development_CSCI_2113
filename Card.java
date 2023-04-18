@@ -17,4 +17,10 @@ public class Card {
 	public char getCol () {
 		return color;
 	}
+
+	// For Testing Purposes
+	public String print () {
+		String print = "" + number + ", " + color;
+		return print;
+	}
 }
