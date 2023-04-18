@@ -8,6 +8,10 @@ public class UnoGUI {
 		Deck deck = new Deck();
 		deck.print();
 		Card card = deck.drawCard();
+		
+		for (int i = 0; i < 108; i++) {
+			card = deck.drawCard();
+		}
 		System.out.println(card.print());
 		deck.print();
 	}	
