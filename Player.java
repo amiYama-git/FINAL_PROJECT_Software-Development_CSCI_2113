@@ -57,6 +57,7 @@ public class Player {
 		 
 		try {
 			objectToServer.writeObject(temp);
+			objectToServer.flush();
 		} catch (IOException e) {
 			// error message
 		}
@@ -75,6 +76,7 @@ public class Player {
 			// send to the server
 			try {
 				objectToServer.writeObject(card);
+				objectToServer.flush();
 			} catch (IOException e) {
 				System.out.println("FAILED TO PLAY WILD CARD");
 			}
@@ -89,6 +91,7 @@ public class Player {
 		else if (color == onStack.getCol()) {
 			 try {
 				 objectToServer.writeObject(card);
+				 objectToServer.flush();
 			 } catch (IOException e) {
 				 System.out.println("FAILED TO PLAY MATCHING COLOR CARD");
 			 }
@@ -104,6 +107,7 @@ public class Player {
 			// send to the server
 			try {
 				objectToServer.writeObject(card);
+				objectToServer.flush();
 			} catch (IOException e) {
 				System.out.println("FAILED TO PLAY MATCHING NUMBER CARD");
 			}
@@ -120,11 +124,16 @@ public class Player {
 			return false;
 		}
 	}
- 
+
 	public void receiveCard(Card card) {
 		hand.add(card);
 		System.out.println("Received card: " + card.getCol() + " " + card.getNum());
 		// send to the gui--what is the method called?
+	}
+
+	public void updateStack(Card card) {
+		onStack = card;
+		// send to the gui
 	}
  
 	public void remove(int number, char color) {
@@ -155,6 +164,7 @@ public class Player {
 			try {
 				// read FROM the server
 				objectFromServer = new ObjectInputStream(sock.getInputStream());
+				objectToServer.flush();
 				  
 			}
 			catch (Exception e) {
@@ -177,7 +187,7 @@ public class Player {
 					if (card.getStatus().equals("played")) {
 						// update stack
 						// do whatever may be required--draw cards or be skipped
-						onStack = card;
+						updateStack(card);
 						// draw 4
 						if (card.getNum() == -4) {
 							drawCard();
