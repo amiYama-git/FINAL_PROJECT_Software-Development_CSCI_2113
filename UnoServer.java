@@ -9,7 +9,6 @@ import java.util.*;
 
 public class UnoServer {
 	private ServerSocket server;
-	private ObjectOutputStream objectToPlayer;
 	private Deck deckInPlay = new Deck();
 	private PlayerHandler ph = new PlayerHandler();
 	
@@ -33,27 +32,10 @@ public class UnoServer {
 				// accept incoming connection
 				Socket newPlayer = server.accept();
 
-				try {
-					// write TO the player
-					objectToPlayer = new ObjectOutputStream(newPlayer.getOutputStream());
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-
 				System.out.println("Accepted");
 				
 				// add to the player handler
 				ph.add(newPlayer);
-
-				// deal the player 7 cards
-				for (int i = 0; i < 8; i++) {
-					System.out.println("DEALING CARD " + (i+1));
-					Card temp = deckInPlay.drawCard();
-					temp.setStatus("drawn");
-					objectToPlayer.writeObject(temp);
-					objectToPlayer.flush();
-				}
 
 				System.out.println("ATTEMPTING TO CREATE READING THREAD");
 
@@ -97,6 +79,16 @@ public class UnoServer {
 		@Override
 		public void run() {
 			try {
+				// deal the player 7 cards initially
+				for (int i = 0; i < 7; i++) {
+					System.out.println("DEALING CARD " + (i+1));
+					Card temp = deckInPlay.drawCard();
+					temp.setStatus("drawn");
+					objectToPlayer.writeObject(temp);
+					objectToPlayer.flush();
+				}
+
+
 				while (true) {
 					Card temp = (Card) objectFromPlayer.readObject();
 					String status = temp.getStatus();
@@ -119,7 +111,7 @@ public class UnoServer {
 			}
 			catch (Exception e) {
 				e.printStackTrace();
-				System.out.println("FAILED TO RUN READING THREAD");
+				System.out.println("FAILED TO RUN READING THREAD--Player Disconnected");
 			}
 		}
 	}
