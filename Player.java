@@ -1,15 +1,14 @@
 /*
  * Equivalent of client
  * Will store: card on top of deck, their own hand, how many cards the opponent has, their own name
- */
-
+*/
 
 import java.io.*;
+import java.lang.management.ThreadInfo;
 import java.net.*;
 import java.util.*;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.*;
  
 public class Player {
 	private ArrayList<Card> hand = new ArrayList<Card>();
@@ -18,6 +17,7 @@ public class Player {
 	private String name;
 	private UnoGUI gui;
 	private ObjectOutputStream objectToServer;
+	private ObjectInputStream objectFromServer;
   
 	public Player (String host, int port, String name, UnoGUI gui) {
 		this.name = name;
@@ -75,6 +75,25 @@ public class Player {
 	public boolean playCard(int num, char color) {
 		Card card = new Card(num, color);
 		card.setStatus("played");
+
+		// if it's the first turn
+		if (onStack == null) {
+			try {
+				objectToServer.writeObject(card);
+				objectToServer.flush();
+			} catch (IOException e) {
+				System.out.println("FAILED TO PLAY FIRST TURN");
+			}
+
+			// remove from hand
+			remove(num, color);
+
+			System.out.println("PLAYED FIRST TURN: " + num + " " + color);
+
+			return true;
+		}
+
+
 		// wild cards always get played
 		if (color == 's') {
 			/* ask for what color to change it to -- trigger some GUI thing
@@ -91,27 +110,31 @@ public class Player {
  
 			// remove from hand
 			remove(num, color);
+
+			System.out.println("PLAYED WILD CARD");
  
 			return true;
 		}
   
 		// if the colors match
 		else if (color == onStack.getCol()) {
-			 try {
-				 objectToServer.writeObject(card);
-				 objectToServer.flush();
-			 } catch (IOException e) {
-				 System.out.println("FAILED TO PLAY MATCHING COLOR CARD");
-			 }
+			try {
+				objectToServer.writeObject(card);
+				objectToServer.flush();
+			} catch (IOException e) {
+				System.out.println("FAILED TO PLAY MATCHING COLOR CARD");
+			}
  
-			 // remove from hand
-			 remove(num, color);
+			// remove from hand
+			remove(num, color);
+
+			System.out.println("PLAYED MATCHING COLOR CARD: " + num + " " + color);
  
-			 return true;
-		 }
+			return true;
+		}
   
-		 // if the numbers match
-		 else if (num == onStack.getNum()) {
+		// if the numbers match
+		else if (num == onStack.getNum()) {
 			// send to the server
 			try {
 				objectToServer.writeObject(card);
@@ -122,7 +145,9 @@ public class Player {
  
 			// remove from hand
 			remove(num, color);
- 
+			
+			System.out.println("PLAYED MATCHING NUMBER CARD: " + num + " " + color);
+
 			return true;
 		}
   
@@ -163,7 +188,6 @@ public class Player {
 	// listens for Card objects from the server
 	private class listeningThread extends Thread {
 		private Socket sock;
-		private ObjectInputStream objectFromServer;
 		  
 		public listeningThread (Socket sock) {
 			this.sock = sock;
@@ -172,7 +196,6 @@ public class Player {
 			try {
 				// read FROM the server
 				objectFromServer = new ObjectInputStream(sock.getInputStream());
-				objectToServer.flush();
 				  
 			}
 			catch (Exception e) {
@@ -220,7 +243,7 @@ public class Player {
 				}
 			}
 			catch (Exception e) {
-				System.out.println("FAILED TO RUN LISTENING THREAD");
+				System.out.println("FAILED TO RUN LISTENING THREAD--Server Stopped");
 				e.printStackTrace();
 			}
 		}
@@ -229,18 +252,17 @@ public class Player {
 	public static void main(String[] args) {
 		// TESTING--THIS WILL BE DELETED
 		Player player = new Player("localhost", 8181, "TESTER", null);
-		 
+
 		System.out.println("WILL ATTEMPT TO DRAW 2 CARDS");
 		player.drawCard();
 		player.drawCard();
+
+		player.playCard(8, 'r'); // first turn check
+		player.playCard(8, 'y'); // matching number check
+		player.playCard(5, 'y'); // matching color check
+		player.playCard(-1, 's'); // special card check
  
-		System.out.println("HAND CURRENTLY CONTAINS: ");
-		ArrayList<Card> temp = player.hand;
-		int i = 0;
-		for (Card card : temp) {
-			System.out.println(temp.get(i).getCol() + " " + temp.get(i).getNum());
-			i++;
-		}
+		
 	 
 	}
 }
