@@ -32,6 +32,9 @@ public class Player {
 		}
 		catch (Exception e) {
 			// error pop-up/message
+			JFrame error = new JFrame();
+			JOptionPane.showMessageDialog(error, "Failed to Connect", "Connection Error", JOptionPane.ERROR_MESSAGE);
+			error.setVisible(true);
 		}
   
 		// start listening to the server
