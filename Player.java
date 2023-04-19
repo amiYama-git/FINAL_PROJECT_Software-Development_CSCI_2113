@@ -57,6 +57,7 @@ public class Player {
 		 
 		try {
 			objectToServer.writeObject(temp);
+			objectToServer.flush();
 		} catch (IOException e) {
 			// error message
 		}
@@ -75,6 +76,7 @@ public class Player {
 			// send to the server
 			try {
 				objectToServer.writeObject(card);
+				objectToServer.flush();
 			} catch (IOException e) {
 				System.out.println("FAILED TO PLAY WILD CARD");
 			}
@@ -89,6 +91,7 @@ public class Player {
 		else if (color == onStack.getCol()) {
 			 try {
 				 objectToServer.writeObject(card);
+				 objectToServer.flush();
 			 } catch (IOException e) {
 				 System.out.println("FAILED TO PLAY MATCHING COLOR CARD");
 			 }
@@ -104,6 +107,7 @@ public class Player {
 			// send to the server
 			try {
 				objectToServer.writeObject(card);
+				objectToServer.flush();
 			} catch (IOException e) {
 				System.out.println("FAILED TO PLAY MATCHING NUMBER CARD");
 			}
@@ -155,6 +159,7 @@ public class Player {
 			try {
 				// read FROM the server
 				objectFromServer = new ObjectInputStream(sock.getInputStream());
+				objectToServer.flush();
 				  
 			}
 			catch (Exception e) {

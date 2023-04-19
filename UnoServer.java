@@ -52,6 +52,7 @@ public class UnoServer {
 					Card temp = deckInPlay.drawCard();
 					temp.setStatus("drawn");
 					objectToPlayer.writeObject(temp);
+					objectToPlayer.flush();
 				}
 
 				System.out.println("ATTEMPTING TO CREATE READING THREAD");
@@ -106,6 +107,7 @@ public class UnoServer {
 						toSend.setStatus("drawn");
 						System.out.println("SENDING!");
 						objectToPlayer.writeObject(toSend);
+						objectToPlayer.flush();
 					}
 					
 					if (status.equals("played")) {
