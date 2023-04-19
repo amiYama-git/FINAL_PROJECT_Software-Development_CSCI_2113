@@ -48,6 +48,11 @@ public class Player {
 	public Socket getSocket() {
 		return sock;
 	}
+
+        // Getter for the hand
+        public ArrayList<Card> getHand() {
+                return hand;
+        }
   
 	public void drawCard() {
 		System.out.println("ATTEMPTING TO DRAW CARD");
