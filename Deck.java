@@ -28,21 +28,6 @@ public class Deck {
                 return card;
         }
 
-	// For Testing Purposes
-	public void print() {
-		Iterator <Card> it = deck.iterator();
-
-		System.out.println("BOTTOM OF DECK");
-
-		// Iterates through Entire Deck, Printing Each Card. 
-		while (it.hasNext()) {
-			Card test = it.next();
-			System.out.println(test.print());
-		}
-		
-		System.out.println("TOP OF DECK");
-	}
-
 	// Shuffles the Deck
 	private void shuffle() {
 		Collections.shuffle(deck);
