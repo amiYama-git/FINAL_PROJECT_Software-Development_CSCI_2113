@@ -1,0 +1,2 @@
+
+the UML diagram has elements for all features of the GUI 	-2

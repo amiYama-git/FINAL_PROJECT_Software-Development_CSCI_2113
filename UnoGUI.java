@@ -1,3 +1,11 @@
+
+import java.util.*;
+import java.net.*;
+import java.io.*;
+
+import javax.swing.*;
+import java.awt.*;
+
 /*
  * The GUI
  */
@@ -136,4 +144,3 @@ public class UnoGUI{
     }
 
 	
-}

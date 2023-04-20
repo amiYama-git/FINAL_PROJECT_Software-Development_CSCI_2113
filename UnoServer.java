@@ -1,8 +1,126 @@
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
 /*
  * This is the server
  * Stores player objects, stack of cards played (only the top one is important), the available cards to pull, base deck
  */
 
 public class UnoServer {
+	private ServerSocket server;
+	private Deck deckInPlay = new Deck();
+	private PlayerHandler ph = new PlayerHandler();
 	
+	public UnoServer (int port) {
+		try {
+			server = new ServerSocket(port);
+		}
+		catch (Exception e) {
+			System.out.println("FAILED TO MAKE SERVERSOCKET");
+			// error pop-up/message
+			System.exit(1);
+		}
+	}
+
+	// listen for incoming connections
+	public void serve() {
+		while(true){
+			try{
+				System.out.println("Waiting for connections...");
+				
+				// accept incoming connection
+				Socket newPlayer = server.accept();
+
+				System.out.println("Accepted");
+				
+				// add to the player handler
+				ph.add(newPlayer);
+
+				System.out.println("ATTEMPTING TO CREATE READING THREAD");
+
+				// start listening to the player
+				(new readingThread(newPlayer)).start();
+			}
+			catch(Exception e){
+				System.out.println("FAILED TO SERVE");
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+	}
+
+	// listen for communication from clients, new thread for each client
+	private class readingThread extends Thread {
+		private Socket sock;
+		private ObjectInputStream objectFromPlayer;
+		private BufferedReader br;
+		private ObjectOutputStream objectToPlayer;
+		private PrintWriter pw;
+
+		public readingThread(Socket sock) {
+			System.out.println("READING THREAD CREATED");
+			this.sock = sock;
+			// set up i/o stream readers
+			// set up the i/o stream readers
+			try {
+				// read FROM the player
+				objectFromPlayer = new ObjectInputStream(sock.getInputStream());
+ 
+				// write TO the player
+				objectToPlayer = new ObjectOutputStream(sock.getOutputStream());
+			}
+			catch (Exception e) {
+				System.out.println("FAILED TO START READING THREAD");
+				// error pop-up/message
+			}
+		}
+
+		@Override
+		public void run() {
+			try {
+				// update opponent on hand size
+
+				// deal the player 7 cards initially
+				for (int i = 0; i < 7; i++) {
+					System.out.println("DEALING CARD " + (i+1));
+					Card temp = deckInPlay.drawCard();
+					temp.setStatus("drawn");
+					objectToPlayer.writeObject(temp);
+					objectToPlayer.flush();
+				}
+
+
+				while (true) {
+					Card temp = (Card) objectFromPlayer.readObject();
+					String status = temp.getStatus();
+
+					if (status.equals("request")) {
+						// player is requesting a card--send one
+						Card toSend = deckInPlay.drawCard();
+						toSend.setStatus("drawn");
+						System.out.println("SENDING!");
+						objectToPlayer.writeObject(toSend);
+						objectToPlayer.flush();
+					}
+					
+					if (status.equals("played")) {
+						// player has played a card--tell everyone to update their onStack Card
+						// no changes needed
+						ph.sendCard(temp);
+					}
+				}
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("FAILED TO RUN READING THREAD--Player Disconnected");
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		UnoServer game = new UnoServer(Integer.parseInt(args[0]));
+		game.serve();
+	}
+
 }
