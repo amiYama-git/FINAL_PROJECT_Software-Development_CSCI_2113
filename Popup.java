@@ -25,15 +25,28 @@ public class Popup extends Thread  {
                 pop.setUndecorated(true);
 
 		// Makes a Square
-		pop.setSize(300, 300);
+		pop.setSize(230, 350);
 
 		// Puts it in the Middle
 		// Will this be relative based on size of computer screen? If so we may need it to pass where the Draw / Place pile is on the main GUI?
 		pop.setLocation(550, 250);	
 
                 // Calls Method making the frame depending on the type
-JLabel label = new JLabel ("BEANS"); // Test
-pop.add(label);
+// TEST TO SEE IF IT WORKS
+JLabel label = new JLabel (); // Test
+String arg = "special_gifs/Blue_Skip.gif";
+ImageIcon icon = null;
+try {
+	icon = new ImageIcon (arg);
+} catch (Exception e) {
+	System.out.println("File Not Found");
+}
+// ImageIcon icon = new ImageIcon(arg);
+label.setIcon(icon);
+
+pop.getContentPane().add(label);
+// END TEST
+
 		// Makes the Frame Itself Transparent. 
 		pop.setBackground(new Color(1.0f,1.0f,1.0f,0.0f));
 
@@ -42,7 +55,7 @@ pop.add(label);
 
 		// Waits three seconds
 		try {
-			sleep(4000);
+			sleep(5000);
 		} catch (Exception e) {
 			System.out.println("Popup Failed");
 		}
