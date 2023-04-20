@@ -79,6 +79,8 @@ public class UnoServer {
 		@Override
 		public void run() {
 			try {
+				// update opponent on hand size
+
 				// deal the player 7 cards initially
 				for (int i = 0; i < 7; i++) {
 					System.out.println("DEALING CARD " + (i+1));

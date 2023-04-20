@@ -33,4 +33,8 @@ public class PlayerHandler {
 		}
 
 	}
+
+	public void updateHandSize(int i) {
+		
+	}
 }

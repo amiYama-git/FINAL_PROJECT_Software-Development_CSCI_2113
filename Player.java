@@ -164,13 +164,18 @@ public class Player {
 	public void receiveCard(Card card) {
 		hand.add(card);
 		System.out.println("Received card: " + card.getCol() + " " + card.getNum());
-		// send to the gui--send single card or array?
+		// send to the gui--send the whole array
+		// gui.updateHand(hand);
 	}
 
 	public void updateStack(Card card) {
 		onStack = card;
 		// tell how many cards the opponent has
 		// send to the gui
+	}
+
+	public int getHandSize() {
+		return hand.size();
 	}
  
 	public void remove(int number, char color) {
