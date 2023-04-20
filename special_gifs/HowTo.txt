@@ -1,0 +1,12 @@
+
+
+How the GIFS are Made
+
+Edit the image in IMovie with Spin In at the  beginning and Spin Out at the end.
+(Automatically Turns it into a video) 
+
+Use https://www.unscreen.com to Remove the Black Background (Automatically converts file into GIF)
+
+Use https://redketchup.io/gif-resizer To Resize the Image into 230 x 350 Pixels
+
+Rename and Put into special_gifs file.
