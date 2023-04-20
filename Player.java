@@ -58,8 +58,6 @@ public class Player {
         }
   
 	public void drawCard() {
-		System.out.println("ATTEMPTING TO DRAW CARD");
- 
 		Card temp = new Card(-5, 's'); // random, unimportant arguments here
 		temp.setStatus("request"); // the important argument
 		 
@@ -69,6 +67,8 @@ public class Player {
 		} catch (IOException e) {
 			// error message
 		}
+
+		System.out.println("DREW A CARD");
 	}
 
 	// triggered by the GUI
@@ -84,6 +84,9 @@ public class Player {
 			} catch (IOException e) {
 				System.out.println("FAILED TO PLAY FIRST TURN");
 			}
+
+			// update stack
+			onStack = card;
 
 			// remove from hand
 			remove(num, color);
@@ -220,24 +223,28 @@ public class Player {
 						// do whatever may be required--draw cards or be skipped
 						updateStack(card);
 						// draw 4
-						if (card.getNum() == -4) {
+						if (card.getNum() == 400) {
 							drawCard();
 							drawCard();
 							drawCard();
 							drawCard();
+							System.out.println("OPPONENT PLAYED DRAW 4");
 						}
 						// draw 2
-						else if (card.getNum() == -2) {
+						else if (card.getNum() == 200) {
 							drawCard();
 							drawCard();
+							System.out.println("OPPONENT PLAYED DRAW 2");
 						}
 						// skip turn
-						else if (card.getNum() == -3) {
+						else if (card.getNum() == 300) {
 							// do nothing...?
+							System.out.println("OPPONENT PLAYED SKIP");
 						}
 						// rotate
-						else if (card.getNum() == -5) {
+						else if (card.getNum() == 100) {
 							// again, do nothing
+							System.out.println("OPPONENT PLAYED ROTATE");
 						}
 					}
 				}
@@ -260,7 +267,12 @@ public class Player {
 		player.playCard(8, 'r'); // first turn check
 		player.playCard(8, 'y'); // matching number check
 		player.playCard(5, 'y'); // matching color check
-		player.playCard(-1, 's'); // special card check
+		player.playCard(200, 'r'); // draw 2 check
+		player.playCard(300, 'r'); // skip check
+		player.playCard(100, 'r'); // rotate check
+		player.playCard(500, 's'); // special card check
+		player.playCard(400, 's'); // draw four check
+		
  
 		
 	 
