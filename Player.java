@@ -164,11 +164,12 @@ public class Player {
 	public void receiveCard(Card card) {
 		hand.add(card);
 		System.out.println("Received card: " + card.getCol() + " " + card.getNum());
-		// send to the gui--what is the method called?
+		// send to the gui--send single card or array?
 	}
 
 	public void updateStack(Card card) {
 		onStack = card;
+		// tell how many cards the opponent has
 		// send to the gui
 	}
  
