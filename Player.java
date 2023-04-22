@@ -18,6 +18,7 @@ public class Player {
 	private UnoGUI gui;
 	private ObjectOutputStream objectToServer;
 	private ObjectInputStream objectFromServer;
+	private int opponent; // number of cards held by the opponent
   
 	public Player (String host, int port, String name, UnoGUI gui) {
 		this.name = name;
@@ -36,6 +37,9 @@ public class Player {
 			JOptionPane.showMessageDialog(error, "Failed to Connect", "Connection Error", JOptionPane.ERROR_MESSAGE);
 			error.setVisible(true);
 		}
+
+		// at the start of the game, both players will have 7 cards
+		opponent = 7;
   
 		// start listening to the server
 		(new listeningThread(sock)).start();
@@ -46,16 +50,20 @@ public class Player {
 	
 	public Player (Socket sock) {
 		this.sock = sock;
+		opponent = 7;
 	}
  
 	public Socket getSocket() {
 		return sock;
 	}
 
-        // Getter for the hand
-        public ArrayList<Card> getHand() {
-                return hand;
-        }
+	public ArrayList<Card> getHand() {
+		return hand;
+	}
+
+	public int getHandSize() {
+		return hand.size();
+	}
   
 	public void drawCard() {
 		Card temp = new Card(-5, 's'); // random, unimportant arguments here
@@ -67,8 +75,6 @@ public class Player {
 		} catch (IOException e) {
 			// error message
 		}
-
-		System.out.println("DREW A CARD");
 	}
 
 	// triggered by the GUI
@@ -103,6 +109,7 @@ public class Player {
 			String [] options = {"red", "yellow", "blue", "green"};
 			JOptionPane.showOptionDialog(new JFrame(), "Change to which color?", "Wild Card!", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, 'r');
 			*/
+
 			// send to the server
 			try {
 				objectToServer.writeObject(card);
@@ -119,7 +126,7 @@ public class Player {
 			return true;
 		}
   
-		// if the colors match
+		// if the colors match ************this is not working
 		else if (color == onStack.getCol()) {
 			try {
 				objectToServer.writeObject(card);
@@ -162,22 +169,27 @@ public class Player {
 	}
 
 	public void receiveCard(Card card) {
-		hand.add(card);
-		System.out.println("Received card: " + card.getCol() + " " + card.getNum());
-		// send to the gui--send the whole array
-		// gui.updateHand(hand);
+		if (card.getStatus().equals("drawn")) {
+			hand.add(card);
+			System.out.println("Drew card: " + card.getCol() + " " + card.getNum());
+			// send to the gui--send the whole array
+			// gui.updateHand(hand);
+		}
+		else if (card.getStatus().equals("update")) {
+			opponent = card.getNum();
+			System.out.println("OPPONENT HAS: " + opponent + " cards");
+			
+		}
 	}
 
 	public void updateStack(Card card) {
 		onStack = card;
-		// tell how many cards the opponent has
+		char c = card.getCol();
+		int n = card.getNum();
+		System.out.println("UPDATED STACK WITH: " + c + " " + n);
 		// send to the gui
 	}
 
-	public int getHandSize() {
-		return hand.size();
-	}
- 
 	public void remove(int number, char color) {
 		for (int i = 0; i < hand.size(); i++) {
 			int num = hand.get(i).getNum();
@@ -188,6 +200,15 @@ public class Player {
 				break;
 			}
 		}
+	}
+
+	public void disconnect() {
+		try {
+			objectToServer.close();
+			objectFromServer.close();
+			sock.close();
+		}
+		catch (Exception e) {}
 	}
    
 	// thoughts on UNO button: we need to listen to it from both sides, so what if it's a static object across all guis?
@@ -219,11 +240,13 @@ public class Player {
 				while(true) {
 					Card card = (Card) objectFromServer.readObject();
 					
+					// drew a card
 					if (card.getStatus().equals("drawn")) {
 						// add to hand
 						receiveCard(card);
 					}
-					 
+					
+					// opponent played a card
 					if (card.getStatus().equals("played")) {
 						// update stack
 						// do whatever may be required--draw cards or be skipped
@@ -253,17 +276,22 @@ public class Player {
 							System.out.println("OPPONENT PLAYED ROTATE");
 						}
 					}
+
+					// indicates an update to the opponent's hand
+					if (card.getStatus().equals("update")) {
+						receiveCard(card);
+					}
 				}
 			}
 			catch (Exception e) {
-				System.out.println("FAILED TO RUN LISTENING THREAD--Server Stopped");
+				System.out.println("DISCONNECTED");
 				e.printStackTrace();
 			}
 		}
 	} 
  
 	public static void main(String[] args) {
-		// TESTING--THIS WILL BE DELETED
+		/* TESTING--THIS WILL BE DELETED
 		Player player = new Player("localhost", 8181, "TESTER", null);
 
 		System.out.println("WILL ATTEMPT TO DRAW 2 CARDS");
@@ -278,7 +306,7 @@ public class Player {
 		player.playCard(100, 'r'); // rotate check
 		player.playCard(500, 's'); // special card check
 		player.playCard(400, 's'); // draw four check
-		
+		*/
  
 		
 	 

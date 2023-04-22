@@ -57,6 +57,7 @@ public class UnoServer {
 		private BufferedReader br;
 		private ObjectOutputStream objectToPlayer;
 		private PrintWriter pw;
+		int hand;
 
 		public readingThread(Socket sock) {
 			System.out.println("READING THREAD CREATED");
@@ -90,6 +91,8 @@ public class UnoServer {
 					objectToPlayer.flush();
 				}
 
+				hand = 7;
+
 
 				while (true) {
 					Card temp = (Card) objectFromPlayer.readObject();
@@ -99,15 +102,22 @@ public class UnoServer {
 						// player is requesting a card--send one
 						Card toSend = deckInPlay.drawCard();
 						toSend.setStatus("drawn");
-						System.out.println("SENDING!");
+						System.out.println("SENDING A DRAWN CARD");
 						objectToPlayer.writeObject(toSend);
 						objectToPlayer.flush();
+						hand++;
+
+						ph.updateHands(sock, hand);
 					}
 					
 					if (status.equals("played")) {
 						// player has played a card--tell everyone to update their onStack Card
 						// no changes needed
+						System.out.println("SENDING A PLAYED CARD");
 						ph.sendCard(temp);
+						hand--;
+
+						ph.updateHands(sock, hand);
 					}
 				}
 			}

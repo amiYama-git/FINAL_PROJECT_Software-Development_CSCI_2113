@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.*;
 import java.util.*;
 
@@ -29,12 +31,39 @@ public class PlayerHandler {
 
 		while (iterator.hasNext()) {
 			Player temp = iterator.next();
-			temp.receiveCard(card);
+			
+			try {
+				ObjectOutputStream objectToPlayer = new ObjectOutputStream(temp.getSocket().getOutputStream());
+				objectToPlayer.writeObject(card);
+			}
+			catch (Exception e) {}
 		}
-
 	}
 
-	public void updateHandSize(int i) {
-		
+	// update all players on the number of cards held by the opponent
+	public void updateHands(Socket changed, int i) {
+		Iterator<Player> iterator = players.iterator();
+
+		while (iterator.hasNext()) {
+			Player temp = iterator.next();
+			ObjectOutputStream objectToPlayer = null;
+
+			try {
+				// write TO the player
+				objectToPlayer = new ObjectOutputStream(temp.getSocket().getOutputStream());
+			}
+			catch (Exception e) { }
+			
+			if (!temp.getSocket().equals(changed)) {
+				Card update = new Card(i, 's');
+				update.setStatus("update");
+
+				try {
+					objectToPlayer.writeObject(update);
+					objectToPlayer.flush();
+				} catch (IOException e) {}
+			}
+		}
 	}
+	
 }
