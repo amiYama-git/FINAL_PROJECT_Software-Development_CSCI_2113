@@ -10,7 +10,7 @@ import java.util.*;
 public class UnoServer {
 	private ServerSocket server;
 	private Deck deckInPlay = new Deck();
-	private PlayerHandler ph = new PlayerHandler();
+	private PlayerHandler ph = new PlayerHandler(this);
 	
 	public UnoServer (int port) {
 		try {
@@ -54,10 +54,7 @@ public class UnoServer {
 	private class readingThread extends Thread {
 		private Socket sock;
 		private ObjectInputStream objectFromPlayer;
-		private BufferedReader br;
 		private ObjectOutputStream objectToPlayer;
-		private PrintWriter pw;
-		int hand;
 
 		public readingThread(Socket sock) {
 			System.out.println("READING THREAD CREATED");
@@ -90,10 +87,7 @@ public class UnoServer {
 					objectToPlayer.writeObject(temp);
 					objectToPlayer.flush();
 				}
-
-				hand = 7;
-
-
+				
 				while (true) {
 					Card temp = (Card) objectFromPlayer.readObject();
 					String status = temp.getStatus();
@@ -105,9 +99,6 @@ public class UnoServer {
 						System.out.println("SENDING A DRAWN CARD");
 						objectToPlayer.writeObject(toSend);
 						objectToPlayer.flush();
-						hand++;
-
-						ph.updateHands(sock, hand);
 					}
 					
 					if (status.equals("played")) {
@@ -115,15 +106,19 @@ public class UnoServer {
 						// no changes needed
 						System.out.println("SENDING A PLAYED CARD");
 						ph.sendCard(temp);
-						hand--;
+					}
 
-						ph.updateHands(sock, hand);
+					// just send it back...?
+					if (status.equals("update")) {
+						objectToPlayer.writeObject(temp);
+						objectToPlayer.flush();
 					}
 				}
 			}
 			catch (Exception e) {
 				e.printStackTrace();
 				System.out.println("FAILED TO RUN READING THREAD--Player Disconnected");
+				System.exit(1);;
 			}
 		}
 	}
