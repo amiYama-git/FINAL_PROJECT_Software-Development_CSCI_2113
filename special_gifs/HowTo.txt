@@ -10,3 +10,5 @@ Use https://www.unscreen.com to Remove the Black Background (Automatically conve
 Use https://redketchup.io/gif-resizer To Resize the Image into 230 x 350 Pixels
 
 Rename and Put into special_gifs file.
+
+Naming Convention = "col_num.gif" where col = Character representing color of card and num = Int representing Type of Card

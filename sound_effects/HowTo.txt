@@ -1,0 +1,7 @@
+
+
+Record the Effect using QuickTime Player. 
+
+Then convert from a .m4a to a .wav with: https://cloudconvert.com/m4a-to-wav
+
+Naming Convention = "num.wav" where num = int representing type of card

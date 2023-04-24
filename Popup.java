@@ -6,6 +6,9 @@ import java.io.*;
 import javax.swing.*;
 import java.awt.*;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 // A Thread that creates a popup for Special Cards based on the inputed type
 /* TO RUN: 
                     // Special Cards Play GIF
@@ -61,6 +64,20 @@ public class Popup extends Thread  {
 
 		// Makes it visible
                 pop.setVisible(true);
+
+		// Makes String for Audio File
+		String audio = "" + num + ".wav";
+
+		// Plays the Audio File
+		try {
+			File file = new File("audio");
+	                Clip clip = AudioSystem.getClip();
+	                clip.open(AudioSystem.getAudioInputStream(file));
+	                clip.start();
+		}
+		catch (Exception e) {
+			System.out.println("Failed to play Audio");
+		}
 
 		// Waits three seconds
 		try {
