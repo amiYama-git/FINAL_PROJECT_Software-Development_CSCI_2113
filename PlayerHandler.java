@@ -1,20 +1,14 @@
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.*;
 import java.util.*;
 
 public class PlayerHandler {
 	ArrayList <Player> players = new ArrayList<Player>();
-	private ObjectOutputStream objectToPlayer;
-	private UnoServer server;
-
-	public PlayerHandler (UnoServer server) {
-		this.server = server;
-	}
 
 	// add a Socket
 	public void add(Socket sock) {
-		Player temp = Player.getPlayer(sock);
+		players.add(new Player(sock));
+		System.out.println("Added to playerhandler; there are " + players.size() + " players");
 	}
 
 	// remove a Socket
@@ -30,13 +24,43 @@ public class PlayerHandler {
 		}
 	}
 
-	// send a card to all players -- used to update onStack
-	public void sendCard(Card card) {
+	// send a card to the opponent
+	public void sendCard(Socket sender, Card card) {
 		Iterator<Player> iterator = players.iterator();
 
 		while (iterator.hasNext()) {
 			Player temp = iterator.next();
-			temp.receiveCard(card);
+
+			if (!temp.getSocket().equals(sender)) {
+				temp.playCard(card); // THIS SOCKET (server-side) sends things BACK TO THE CLIENT
+			}
+		}
+	}
+
+	public void updateOpponent(Socket sender) {
+		Iterator<Player> iterator = players.iterator();
+		Card card = new Card(-1, 'u');
+		card.setStatus("update");
+
+		while (iterator.hasNext()) {
+			Player temp = iterator.next();
+
+			if (!temp.getSocket().equals(sender)) {
+				temp.playCard(card);
+			}
+		}
+	}
+
+	// deal a card
+	public void dealCard(Socket reciever, Card card) {
+		Iterator<Player> iterator = players.iterator();
+
+		while (iterator.hasNext()) {
+			Player temp = iterator.next();
+
+			if (temp.getSocket().equals(reciever)) {
+				temp.playCard(card); // THIS SOCKET (server-side) sends things BACK TO THE CLIENT
+			}
 		}
 	}
 	

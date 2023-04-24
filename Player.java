@@ -5,7 +5,6 @@
 
 import java.io.*;
 import java.net.*;
-import java.time.Year;
 import java.util.*;
 
 import javax.swing.*;
@@ -19,10 +18,8 @@ public class Player {
 	private ObjectOutputStream objectToServer;
 	private ObjectInputStream objectFromServer;
 	private int opponent; // number of cards held by the opponent
-	private static ArrayList<Player> players = new ArrayList<>();
   
 	public Player (String host, int port, String name, UnoGUI gui) {
-		players.add(this);
 		this.name = name;
 		this.gui = gui;
 		  
@@ -43,27 +40,23 @@ public class Player {
 		// at the start of the game, both players will have 7 cards
 		opponent = 7;
   
+		System.out.println("PLAYER SUCCESSFULLY CREATED");
+
 		// start listening to the server
 		(new listeningThread(sock)).start();
- 
-		System.out.println("PLAYER SUCCESSFULLY CREATED");
 	}
- 
-	
-	public static Player getPlayer(Socket sock) {
-		Iterator<Player> iterator = players.iterator();
 
-		while (iterator.hasNext()) {
-			Player temp = iterator.next();
+	// player objects created server-side
+	public Player(Socket sock) {
+		this.sock = sock;
 
-			if (temp.getSocket().equals(sock)) {
-				return temp;
-			}
+		try {
+			// write TO the player
+			objectToServer = new ObjectOutputStream(sock.getOutputStream());
 		}
-
-		return null;
+		catch (Exception e) { }
 	}
- 
+
 	public Socket getSocket() {
 		return sock;
 	}
@@ -74,14 +67,6 @@ public class Player {
 
 	public int getHandSize() {
 		return hand.size();
-	}
-
-	public void updateHands() {
-		for (int i = 0; i < players.size(); i++) {
-			// send the gui the hand size
-			players.get(i).getHandSize();
-
-		}
 	}
   
 	public synchronized void drawCard() {
@@ -94,13 +79,15 @@ public class Player {
 		} catch (IOException e) {
 			// error message
 		}
+
+		printHand();
 	}
 
 	public void updateStack(Card card) {
 		onStack = card;
 		char c = card.getCol();
 		int n = card.getNum();
-		System.out.println("UPDATED STACK WITH: " + c + " " + n);
+		gui.updateStack(n + " " + c);
 		// send to the gui
 	}
 
@@ -125,46 +112,94 @@ public class Player {
 		catch (Exception e) {}
 	}
 
-	// triggered by the GUI
+	public Card wildCard() {
+		String [] options = {"red", "yellow", "blue", "green"};
+		int choice = JOptionPane.showOptionDialog(new JFrame(), "Change to which color?", "Wild Card!", 0, 3, null, options, options[0]);
+		Card toSend = new Card(500, 'r');
+
+		if (choice == 0) {
+			toSend = new Card(500, 'r');
+			toSend.setStatus("played");
+			return toSend;
+		}
+
+		if (choice == 1) {
+			toSend = new Card(500, 'y');
+			toSend.setStatus("played");
+			return toSend;
+		}
+
+		if (choice == 2) {
+			toSend = new Card(500, 'b');
+			toSend.setStatus("played");
+			return toSend;
+		}
+
+		if (choice == 3) {
+			toSend = new Card(500, 'g');
+			toSend.setStatus("played");
+			return toSend;
+		}
+
+		return toSend;	
+	}
+
+	// triggered by the GUI, play a card
 	public boolean playCard(int num, char color) {
-		System.out.println("Trying to play: " + num + " " + color);
+		gui.updatePlayer("Trying to play: " + num + " " + color);
 
 		Card card = new Card(num, color);
 		card.setStatus("played");
 
 		// if it's the first turn
 		if (onStack == null) {
-			try {
-				objectToServer.writeObject(card);
-				objectToServer.flush();
-			} catch (IOException e) {
-				System.out.println("FAILED TO PLAY FIRST TURN");
-			}
+			// if it's a wild card
+			if (color == 's') {
+				Card toSend = wildCard();
+				
+				try {
+					objectToServer.writeObject(toSend);
+					objectToServer.flush();
+				} catch (IOException e) {
+					System.out.println("FAILED TO PLAY FIRST TURN");
+				}
 
-			// update stack
-			onStack = card;
+				// update stack
+				updateStack(toSend);
+				
+				gui.updatePlayer("PLAYED FIRST TURN: " + toSend.getNum() + " " + toSend.getCol());
+				
+			}
+			else {
+				// normal card
+				try {
+					objectToServer.writeObject(card);
+				objectToServer.flush();
+				} catch (IOException e) {
+					System.out.println("FAILED TO PLAY FIRST TURN");
+				}
+
+				// update stack
+				updateStack(card);
+
+				gui.updatePlayer("PLAYED FIRST TURN: " + num + " " + color);
+			}
 
 			// remove from hand
 			remove(num, color);
 
-			System.out.println("PLAYED FIRST TURN: " + num + " " + color);
+			printHand();
 
 			return true;
 		}
 
-		System.out.println("On stack is: " + onStack.getNum() + " " + onStack.getCol());
-
-
 		// wild cards always get played
 		if (color == 's') {
-			/* ask for what color to change it to -- trigger some GUI thing
-			String [] options = {"red", "yellow", "blue", "green"};
-			JOptionPane.showOptionDialog(new JFrame(), "Change to which color?", "Wild Card!", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, 'r');
-			*/
+			Card toSend = wildCard();
 
 			// send to the server
 			try {
-				objectToServer.writeObject(card);
+				objectToServer.writeObject(toSend);
 				objectToServer.flush();
 			} catch (IOException e) {
 				System.out.println("FAILED TO PLAY WILD CARD");
@@ -174,14 +209,15 @@ public class Player {
 			remove(num, color);
 
 			// update stack
-			onStack = card;
+			updateStack(toSend);
 
-			System.out.println("PLAYED WILD CARD");
+			gui.updatePlayer("PLAYED WILD CARD: " + toSend.getNum() + " " + toSend.getCol());
+			printHand();
  
 			return true;
 		}
   
-		// if the colors match ************this is not working
+		// if the colors match
 		else if (color == onStack.getCol()) {
 			try {
 				objectToServer.writeObject(card);
@@ -194,9 +230,10 @@ public class Player {
 			remove(num, color);
 
 			// update stack
-			onStack = card;
+			updateStack(card);
 
-			System.out.println("PLAYED MATCHING COLOR CARD: " + num + " " + color);
+			gui.updatePlayer("PLAYED MATCHING COLOR CARD: " + num + " " + color);
+			printHand();
  
 			return true;
 		}
@@ -215,79 +252,85 @@ public class Player {
 			remove(num, color);
 
 			// update stack
-			onStack = card;
+			updateStack(card);
 			
-			System.out.println("PLAYED MATCHING NUMBER CARD: " + num + " " + color);
+			gui.updatePlayer("PLAYED MATCHING NUMBER CARD: " + num + " " + color);
+			printHand();
 
 			return true;
 		}
   
 		else {
-			System.out.println("CARD COULD NOT BE PLAYED -- NO ERROR BESIDES PLAYER JUDGEMENT");
+			gui.updatePlayer("CARD COULD NOT BE PLAYED -- NO ERROR BESIDES PLAYER JUDGEMENT");
 			// pop-up telling the player that card isn't playable?
 			return false;
 		}
 	}
 
+	// used server-side to send things to players client-side
+	public void playCard(Card card) {
+		try {
+			objectToServer.writeObject(card);
+			objectToServer.flush();
+		} catch (IOException e) {
+			System.out.println("FAILED TO PLAY CARD");
+		}
+	}
+
+	// used to differentiate the types of cards the client can recieve from the server
 	public void receiveCard(Card card) {
 		// drew a card--add it to the hand
 		if (card.getStatus().equals("drawn")) {
 			hand.add(card);
-			System.out.println("Drew card: " + card.getCol() + " " + card.getNum());
+			gui.updatePlayer("Drew card: " + card.getNum() + " " + card.getCol());
 			// send to the gui--send the whole array
 			// gui.updateHand(hand);
 		}
-		// opponent has done something--update their hand count
+		// opponent has drawn a card--update their hand count
 		else if (card.getStatus().equals("update")) {
-			opponent = card.getNum();
-			System.out.println("OPPONENT HAS: " + opponent + " cards");
+			opponent++;
+			gui.updateOpponent("OPPONENT HAS: " + opponent + " cards");
 			// tell the gui!
 			
 		}
 		// opponent played a card--update stack and do whatever else may be required
 		else if (card.getStatus().equals("played")) {
 			// update stack
-
 			updateStack(card);
+
+			// update opponent
+			opponent--;
+			gui.updateOpponent("OPPONENT HAS: " + opponent + " cards");
+
 			// draw 4
 			if (card.getNum() == 400) {
 				drawCard();
 				drawCard();
 				drawCard();
 				drawCard();
-				System.out.println("OPPONENT PLAYED DRAW 4");
+				gui.updateOpponent("OPPONENT PLAYED DRAW 4");
 			}
 			// draw 2
 			else if (card.getNum() == 200) {
 				drawCard();
 				drawCard();
-				System.out.println("OPPONENT PLAYED DRAW 2");
+				gui.updateOpponent("OPPONENT PLAYED DRAW 2");
 			}
 			// skip turn
 			else if (card.getNum() == 300) {
 				// do nothing...?
-				System.out.println("OPPONENT PLAYED SKIP");
+				gui.updateOpponent("OPPONENT PLAYED SKIP");
 			}
 			// rotate
 			else if (card.getNum() == 100) {
 				// again, do nothing
-				System.out.println("OPPONENT PLAYED ROTATE");
+				gui.updateOpponent("OPPONENT PLAYED ROTATE");
 			}
 		}
 	}
-   
+
 	// thoughts on UNO button: we need to listen to it from both sides, so what if it's a static object across all guis?
 	// then thread it in the server (idk how it gets to the server, maybe the player will send it) so it exists on both guis
-
-	// When UNO Button is Pressed
-	public Boolean uno() {
-		// Checks if the player has UNO
-		return true;
-
-		// If not, Sends UNO Message to Server and Server Determines if the other player has UNO
-		// If noone has UNO, then this player picks two cards. If the other player has UNO, then they pick two cards
-	}
-
 	// as the same button with the same thread?
   
 	// listens for Card objects from the server
@@ -301,18 +344,20 @@ public class Player {
 			try {
 				// read FROM the server
 				objectFromServer = new ObjectInputStream(sock.getInputStream());
-				  
 			}
 			catch (Exception e) {
 				System.out.println("FAILED TO START LISTENING THREAD");
 			}
-  
+			
+			System.out.println("STARTED LISTENING THREAD");
+
 		}
  
 		@Override
 		public void run() {
 			try {
 				while(true) {
+					System.out.println("Waiting for card...");
 					Card card = (Card) objectFromServer.readObject();
 					receiveCard(card);
 				}
@@ -323,6 +368,14 @@ public class Player {
 			}
 		}
 	} 
+
+	public void printHand() {
+		gui.clearHand();
+
+		for (int i = 0; i < hand.size(); i++) {
+			gui.updateHand(hand.get(i).getNum() + " " + hand.get(i).getCol());
+		}
+	}
  
 	public static void main(String[] args) {
 		// TESTING--THIS WILL BE DELETED
