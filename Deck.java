@@ -134,46 +134,46 @@ public class Deck {
                 deck.add(new Card (9, 'b'));
 
 		// Skip
-                deck.add(new Card (-3, 'r'));
-                deck.add(new Card (-3, 'y'));
-                deck.add(new Card (-3, 'g'));
-                deck.add(new Card (-3, 'b'));
-                deck.add(new Card (-3, 'r'));
-                deck.add(new Card (-3, 'y'));
-                deck.add(new Card (-3, 'g'));
-                deck.add(new Card (-3, 'b'));
+                deck.add(new Card (300, 'r'));
+                deck.add(new Card (300, 'y'));
+                deck.add(new Card (300, 'g'));
+                deck.add(new Card (300, 'b'));
+                deck.add(new Card (300, 'r'));
+                deck.add(new Card (300, 'y'));
+                deck.add(new Card (300, 'g'));
+                deck.add(new Card (300, 'b'));
 
 		// Rotate
-                deck.add(new Card (-5, 'r'));
-                deck.add(new Card (-5, 'y'));
-                deck.add(new Card (-5, 'g'));
-                deck.add(new Card (-5, 'b'));
-                deck.add(new Card (-5, 'r'));
-                deck.add(new Card (-5, 'y'));
-                deck.add(new Card (-5, 'g'));
-                deck.add(new Card (-5, 'b'));
+                deck.add(new Card (100, 'r'));
+                deck.add(new Card (100, 'y'));
+                deck.add(new Card (100, 'g'));
+                deck.add(new Card (100, 'b'));
+                deck.add(new Card (100, 'r'));
+                deck.add(new Card (100, 'y'));
+                deck.add(new Card (100, 'g'));
+                deck.add(new Card (100, 'b'));
 
 		// Plus Two
-                deck.add(new Card (-2, 'r'));
-                deck.add(new Card (-2, 'y'));
-                deck.add(new Card (-2, 'g'));
-                deck.add(new Card (-2, 'b'));
-                deck.add(new Card (-2, 'r'));
-                deck.add(new Card (-2, 'y'));
-                deck.add(new Card (-2, 'g'));
-                deck.add(new Card (-2, 'b'));
+                deck.add(new Card (200, 'r'));
+                deck.add(new Card (200, 'y'));
+                deck.add(new Card (200, 'g'));
+                deck.add(new Card (200, 'b'));
+                deck.add(new Card (200, 'r'));
+                deck.add(new Card (200, 'y'));
+                deck.add(new Card (200, 'g'));
+                deck.add(new Card (200, 'b'));
 
 		// WILD CARD!!!! :-)
-		deck.add(new Card (-1, 's'));
-                deck.add(new Card (-1, 's'));
-                deck.add(new Card (-1, 's'));
-                deck.add(new Card (-1, 's'));
+		deck.add(new Card (500, 's'));
+                deck.add(new Card (500, 's'));
+                deck.add(new Card (500, 's'));
+                deck.add(new Card (500, 's'));
 
 		// WILD Plus Four
-		deck.add(new Card(-4, 's'));
-                deck.add(new Card(-4, 's'));
-                deck.add(new Card(-4, 's'));
-                deck.add(new Card(-4, 's'));
+		deck.add(new Card(400, 's'));
+                deck.add(new Card(400, 's'));
+                deck.add(new Card(400, 's'));
+                deck.add(new Card(400, 's'));
 
 
 		// Shuffling the Deck
