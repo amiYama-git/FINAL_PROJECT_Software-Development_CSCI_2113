@@ -34,7 +34,7 @@ public class Popup extends Thread  {
                 // Calls Method making the frame depending on the type
 // TEST TO SEE IF IT WORKS
 JLabel label = new JLabel (); // Test
-String arg = "special_gifs/Blue_Skip.gif";
+String arg = "special_gifs/Blue-Skip.gif";
 ImageIcon icon = null;
 try {
 	icon = new ImageIcon (arg);
