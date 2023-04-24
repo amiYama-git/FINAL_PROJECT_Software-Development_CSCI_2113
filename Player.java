@@ -278,6 +278,16 @@ public class Player {
    
 	// thoughts on UNO button: we need to listen to it from both sides, so what if it's a static object across all guis?
 	// then thread it in the server (idk how it gets to the server, maybe the player will send it) so it exists on both guis
+
+	// When UNO Button is Pressed
+	public Boolean uno() {
+		// Checks if the player has UNO
+		return true;
+
+		// If not, Sends UNO Message to Server and Server Determines if the other player has UNO
+		// If noone has UNO, then this player picks two cards. If the other player has UNO, then they pick two cards
+	}
+
 	// as the same button with the same thread?
   
 	// listens for Card objects from the server

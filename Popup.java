@@ -66,11 +66,11 @@ public class Popup extends Thread  {
                 pop.setVisible(true);
 
 		// Makes String for Audio File
-		String audio = "" + num + ".wav";
+		String audio = "sound_effects/" + num + ".wav";
 
 		// Plays the Audio File
 		try {
-			File file = new File("audio");
+			File file = new File(audio);
 	                Clip clip = AudioSystem.getClip();
 	                clip.open(AudioSystem.getAudioInputStream(file));
 	                clip.start();
@@ -81,7 +81,7 @@ public class Popup extends Thread  {
 
 		// Waits three seconds
 		try {
-			sleep(3800);
+			sleep(3000);
 		} catch (Exception e) {
 			System.out.println("Popup Failed");
 		}
