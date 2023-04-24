@@ -2,7 +2,7 @@
 
 import java.util.ArrayList;
 
-public class testMain{
+public class testing-amika{
 
     private Card onStack;
 
