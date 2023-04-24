@@ -1,140 +1,191 @@
-
-import java.util.*;
-import java.net.*;
-import java.io.*;
-
-import javax.swing.*;
-import java.awt.*;
-
 /*
  * The GUI
  */
 
+
+import java.awt.Image;
+import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.*;
+import java.io.*;
+import java.io.File;
+
 
 //break teh array down
 
 public class UnoGUI{
-
+            //uni playing screen gui
             JFrame frame = new JFrame();
             JPanel panel = new JPanel();
+            JFrame startingframe = new JFrame();
             JLayeredPane layered = new JLayeredPane(); //or getLareredPane()?
             ArrayList<JButton> side = new ArrayList<JButton>(); //array of buttons 
             ArrayList<Card> cards = new ArrayList<Card>(); //populated array
             String place; 
-            File[] files;
+            File[] files;//list of the files
+            Player player; 
+            Boolean show = true;
 
-            //1234
+    public void UnoGUI(){//starting screen
 
-    public void UnoGUI(){
+        UNOplayingGUI playingGUI = new UNOplayingGUI();
+        JPanel North = new JPanel(new GridLayout(3, 2, 10, 10));
+        JPanel Northup = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel Northmid = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel Northbottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        frame.setSize(800,800); //random for now
-        layered.setBounds(10,10,800,800);
-        //panel.setBounds(10,10,800,800); //.setBounds(int x-coordinate, int y-coordinate, int width, int height);
-        frame.add(layered);
+        //JFrame startingframe = new JFrame();
+        startingframe.setSize(380,200);
 
-        place = System.getProperty("user.dir") + "\\cards"; // directory to the unoimage folder.
-        files = new File((place).listFiles()); //adds all images to a file
+        //JPanel North = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        //JPanel Middle = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel South = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        //frame.add(panel);
-        frame.setTitle("UNO");
+        JLabel username = new JLabel("Username: ");
+        JLabel IPAdress = new JLabel("IPadress: ");
+        JLabel Port = new JLabel("Port Number: ");
 
-        //JPanel panel = new JPanel();
-        //JButton button = new JButton();
+        JTextField textName = new JTextField(20);
+        JTextField textIPAdress = new JTextField(20);
+        JTextField textPort = new JTextField(20);
 
-        for(int i = 0; i < cards.size(); i++){
-            System.out.println(cards.get(i).print());
-        }
+        JButton connect = new JButton();
+        connect.setText("Connect");
+        connect.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                //player = new Player(textIPAdress.getText(),Integer.parseInt(textPort.getText()),textName.getText(), playingGUI);
+                frame.setVisible(true);
+                startingframe.setVisible(false);
+            }
+        });
 
-        //------
-        /*
-        for(int i = 0; i < side.size(); i++){
-            panel.add(side.get(i));
-        }
-        */
-        //------
-        //panel.setVisible(true);
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Northup.add(username);
+        Northup.add(textName);
+        Northmid.add(IPAdress);
+        Northmid.add(textIPAdress);
+        Northbottom.add(Port);
+        Northbottom.add(textPort);
+        South.add(connect);
+
+        North.add(Northup);
+        North.add(Northmid);
+        North.add(Northbottom);
+
+        startingframe.add(North, BorderLayout.NORTH);
+        //startingframe.add(Middle, BorderLayout.WEST);
+        startingframe.add(South, BorderLayout.SOUTH);
+
+        startingframe.setVisible(true);
+        // if uno bitton is clicked, check #numbr of cards oneplays has, then if it is more than one, then send a new card object send ransom card number, and set it false .setstatus(fasle)
+        //before passing in i make a new card, set status false and then pass it in to the player.
+        //card.setstatus()/string object 
+
+        startingframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
     }
 
-    //the client/player will pass in a card object,then this class will have to be able to choose the right image to be diplayed, and be layered.
-    //if income, then add a layered button on gui.
-    //buttons created here and sent in to the client:
-        // uno button 
-        // draw card button
+    public class UNOplayingGUI{//pass in boolean so if we need to set true we can. 
+        private UNOplayingGUI(){
+            frame.setSize(800,800); //random for now
+            layered.setBounds(300,300,800,120);
+            frame.add(layered); 
 
-    //setting things
-    
-    //button.setOpaque(true);
+            String place = "./" + "cards"; // directory to the unoimage folder.//System.getProperty(
+            //"user.dir" + "/cards"
+            System.out.println(place);
+            files = new File(place).listFiles(); //adds all images to a file
 
-   
-    //button.setBounds(int x-coordinate, int y-coordinate, int width, int height);
+            frame.setTitle("UNO");
+            frame.setVisible(false);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        }
+    }
 
-    //playcard //if return true, then delete form gui
-    //uno button  
+    public void hands(ArrayList<Card> hands){
+        for(int i = 0; i < hands.size(); i++){
+            cards.add(hands.get(i));
+            printcards(hands.get(i));
+        }//copy hands
+        
+    }
 
+    //if its one cards at a time
+    /*
     public void GUIadd(Card thing){
         cards.add(thing);//populate array
         System.out.println(cards.size());
-        printcards();
+        printcards(thing);//one card 
+    }
+    */
+
+    public void printcards(Card onecard){//add image to card
+        //which, 1= hand, 2= stack
+
+        String imagefilename = "./" + "cards/" + choseImage(onecard.getCol(), onecard.getNum());
+        System.out.println(imagefilename);
+
+        ImageIcon dabIcon = new ImageIcon(imagefilename);
+        Image dabImage = dabIcon.getImage();
+        Image modifiedImage = dabImage.getScaledInstance(80, 110, java.awt.Image.SCALE_SMOOTH);
+        dabIcon = new ImageIcon(modifiedImage);
+
+        JButton button = new JButton(dabIcon);
+
+        //pass in button and card? to add actionlistner
+
+
+        for(int i = 0; i < cards.size(); i++){
+            button.setBounds (i*30, 10, 80, 110); //30 80 110
+        }
+
+        button.addActionListener(new ActionListener(){
+
+            public void actionPerformed(ActionEvent e){
+                char color = onecard.getCol();
+                System.out.println(color + " -----");//check
+                int num = onecard.getNum();
+                System.out.println(num + " -----");//check
+
+                System.out.println(cards.size()); //check
+
+                //System.out.println(player.playCard(num,color));//error?
+
+                if(true){ //player.playCard(num, color) == true  issue is here
+                    System.out.println("check check");
+                    show = false;
+                    for(int i = 0; i < cards.size(); i++){
+                        if(onecard == cards.get(i)){
+                            cards.remove(i);
+                        }
+                        System.out.println(cards.size()+ " =======");
+                    }
+                }
+            }
+        });
+
+        System.out.println(show + "what?");
+                layered.add(button);
+                if(show = false){
+                    button = null;
+                }
+                show = true;
     }
 
-    public void printcards(){
-            for(int i = 0; i < cards.size(); i++){
-            //ImageIcon image = new ImageIcon(##add image icon here);
-            ImageIcon image = new ImageIcon(choseImage(cards.get(i).getCol, cards.get(i).getNum));//pass in color and number
-            JButton button = new JButton(image);
-            button.setBounds (i*30, 10, 100, 100);
-            //side.add(button);
+    public void deletecard(){//want to move it here
 
-            //------
-            layered.add(button);
-            //------
-        }
-        /*
-        for(int j = 0; j < side.size(); j++){
-                panel.add(side.get(j));
-            }
-        */
-        
     }
 
     public String choseImage(char color, int num){
 
-        for(int i = 0; i < files.length; i++){ //looks into each file 
-            String filename = files(i).getName(); //string of file name
-            char[] filenameChar = new char[filename.length];// change the string file name to char file name
+        String col = String.valueOf(color);
 
-            for(int k = 0; k < filename.length; i++){ // convert file stirng to file char
-                char[k] = filename.chatAt(k);
-            }
-            
-            for()
-
-            if(filenameChar(0).equals(color)){//then red
-
-            }
-            else{//special 
-
-            }
-
-        }
-
+        return (col +"_"+ num + ".png");
     }
 
-    //.dispose() deleter one thing. 
-    //player.Onstack(char, int)
-    //
-    //player.playcard -- asking if you can place it down - returns true if they can 
-
-    //when connect is pressed, create a player object,  
-    
-
-    public updateHand(){
+    public void updateHand(){
         //sends me a array of cards 
     }
 
@@ -144,3 +195,4 @@ public class UnoGUI{
     }
 
 	
+}
