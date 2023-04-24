@@ -12,3 +12,5 @@ Use https://redketchup.io/gif-resizer To Resize the Image into 230 x 350 Pixels
 Rename and Put into special_gifs file.
 
 Naming Convention = "col_num.gif" where col = Character representing color of card and num = Int representing Type of Card
+
+Has The GIFs for each Special Card and in Each Color

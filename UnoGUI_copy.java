@@ -26,7 +26,7 @@ public class UnoGUI_copy {
 		int num = 100;
 		Player player = new Player("localhost", 8181, "Billy", null);
 
-		// if playCard( ... ) returns true
+		// When card is received from server
 		// Special Cards Play GIF
                  if (num > 9) {
                         Thread popup = new Popup(col, num);
