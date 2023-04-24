@@ -10,7 +10,7 @@ import java.util.*;
 public class UnoServer {
 	private ServerSocket server;
 	private Deck deckInPlay = new Deck();
-	private PlayerHandler ph = new PlayerHandler(this);
+	private PlayerHandler ph = new PlayerHandler();
 	
 	public UnoServer (int port) {
 		try {
@@ -37,8 +37,6 @@ public class UnoServer {
 				// add to the player handler
 				ph.add(newPlayer);
 
-				System.out.println("ATTEMPTING TO CREATE READING THREAD");
-
 				// start listening to the player
 				(new readingThread(newPlayer)).start();
 			}
@@ -54,38 +52,33 @@ public class UnoServer {
 	private class readingThread extends Thread {
 		private Socket sock;
 		private ObjectInputStream objectFromPlayer;
-		private ObjectOutputStream objectToPlayer;
 
 		public readingThread(Socket sock) {
-			System.out.println("READING THREAD CREATED");
-			this.sock = sock;
-			// set up i/o stream readers
-			// set up the i/o stream readers
+			System.out.println("ATTEMPTING TO CREATE READING THREAD");
+
 			try {
+				this.sock = sock;
+
 				// read FROM the player
 				objectFromPlayer = new ObjectInputStream(sock.getInputStream());
- 
-				// write TO the player
-				objectToPlayer = new ObjectOutputStream(sock.getOutputStream());
 			}
 			catch (Exception e) {
 				System.out.println("FAILED TO START READING THREAD");
 				// error pop-up/message
 			}
+
+			System.out.println("READING THREAD CREATED");
 		}
 
 		@Override
 		public void run() {
 			try {
-				// update opponent on hand size
-
 				// deal the player 7 cards initially
 				for (int i = 0; i < 7; i++) {
 					System.out.println("DEALING CARD " + (i+1));
 					Card temp = deckInPlay.drawCard();
 					temp.setStatus("drawn");
-					objectToPlayer.writeObject(temp);
-					objectToPlayer.flush();
+					ph.dealCard(sock, temp);
 				}
 				
 				while (true) {
@@ -97,28 +90,23 @@ public class UnoServer {
 						Card toSend = deckInPlay.drawCard();
 						toSend.setStatus("drawn");
 						System.out.println("SENDING A DRAWN CARD");
-						objectToPlayer.writeObject(toSend);
-						objectToPlayer.flush();
+						
+						ph.dealCard(sock, toSend);
+
+						// must tell opponent
+						ph.updateOpponent(sock);
 					}
 					
 					if (status.equals("played")) {
 						// player has played a card--tell everyone to update their onStack Card
 						// no changes needed
 						System.out.println("SENDING A PLAYED CARD");
-						ph.sendCard(temp);
-					}
-
-					// just send it back...?
-					if (status.equals("update")) {
-						objectToPlayer.writeObject(temp);
-						objectToPlayer.flush();
+						ph.sendCard(sock, temp);
 					}
 				}
 			}
 			catch (Exception e) {
-				e.printStackTrace();
-				System.out.println("FAILED TO RUN READING THREAD--Player Disconnected");
-				System.exit(1);;
+				UnoGUI.error("Player Disconnected");
 			}
 		}
 	}
