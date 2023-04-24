@@ -7,14 +7,23 @@ import javax.swing.*;
 import java.awt.*;
 
 // A Thread that creates a popup for Special Cards based on the inputed type
+/* TO RUN: 
+                    // Special Cards Play GIF
+                    if (num > 9) {
+                        Thread popup = new Popup(color, num);
+                        popup.start();
+                    }
+*/
 
 public class Popup extends Thread  {        
 	// To determine what Image Pops Up
-        private String type;
+        private char col;
+	private int num;
 
         // Thread Constructor
-        public Popup (String type) {
-                this.type = type;
+        public Popup (char col, int num) {
+                this.col = col;
+		this.num = num;
         }
 		
 	// Shows for a couple of second before deleting itself
@@ -31,21 +40,21 @@ public class Popup extends Thread  {
 		// Will this be relative based on size of computer screen? If so we may need it to pass where the Draw / Place pile is on the main GUI?
 		pop.setLocation(550, 250);	
 
-                // Calls Method making the frame depending on the type
-// TEST TO SEE IF IT WORKS
-JLabel label = new JLabel (); // Test
-String arg = "special_gifs/Blue-Skip.gif";
-ImageIcon icon = null;
-try {
-	icon = new ImageIcon (arg);
-} catch (Exception e) {
-	System.out.println("File Not Found");
-}
-// ImageIcon icon = new ImageIcon(arg);
-label.setIcon(icon);
+		// Makes String for calling the GIF from file
+		String type = "special_gifs/" + col + "_" + num + ".gif";
 
-pop.getContentPane().add(label);
-// END TEST
+		// Plays the GIF on a Label
+		JLabel label = new JLabel ();
+		ImageIcon icon = null;
+
+		try {
+			icon = new ImageIcon (type);
+		} catch (Exception e) {
+			System.out.println("File Not Found");
+		}
+
+		label.setIcon(icon);
+		pop.getContentPane().add(label);
 
 		// Makes the Frame Itself Transparent. 
 		pop.setBackground(new Color(1.0f,1.0f,1.0f,0.0f));
@@ -55,7 +64,7 @@ pop.getContentPane().add(label);
 
 		// Waits three seconds
 		try {
-			sleep(5000);
+			sleep(3800);
 		} catch (Exception e) {
 			System.out.println("Popup Failed");
 		}

@@ -154,6 +154,13 @@ public class UnoGUI{
                 //System.out.println(player.playCard(num,color));//error?
 
                 if(true){ //player.playCard(num, color) == true  issue is here
+
+		    // Special Cards Play GIF
+		    if (num > 9) {
+			Thread popup = new Popup(color, num);
+			popup.start();
+		    }	
+
                     System.out.println("check check");
                     show = false;
                     for(int i = 0; i < cards.size(); i++){
