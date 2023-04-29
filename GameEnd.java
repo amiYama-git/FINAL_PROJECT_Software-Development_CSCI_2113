@@ -53,6 +53,27 @@ public class GameEnd extends JFrame {
 
 		// Adds the Audio
 
+		String audio = null;
+
+		// Makes String for Audio File
+		if (status == 'W') {
+			audio = "sound_effects/You_Wini.wav";
+		}
+		else {
+			audio = "sound_effects/You_Lose.wav";
+		}
+		// Plays the Audio File
+		try {
+			File file = new File(audio);
+	                Clip clip = AudioSystem.getClip();
+	                clip.open(AudioSystem.getAudioInputStream(file));
+	                clip.start();
+		}
+		catch (Exception z) {
+			System.out.println("Failed to play Audio");
+		}
+
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	}
 	

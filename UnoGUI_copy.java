@@ -22,7 +22,14 @@ public class UnoGUI_copy {
 
 	public static void main(String[] args) {
 		//TEST
-		char col = 'b';
+
+
+		// Testing End Game Screen
+		GameEnd end = new GameEnd('L');
+		end.setVisible(true);
+
+
+/*		char col = 'b';
 		int num = 100;
 		Player player = new Player("localhost", 8181, "Billy", null);
 
@@ -35,6 +42,7 @@ public class UnoGUI_copy {
 
 		// if UNO Button is Pressed
 		player.uno();
+*/
 	}
 }
 
