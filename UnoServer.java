@@ -39,6 +39,10 @@ public class UnoServer {
 
 				// start listening to the player
 				(new readingThread(newPlayer)).start();
+
+				if (ph.players.size() == 2) {
+					break;
+				}
 			}
 			catch(Exception e){
 				System.out.println("FAILED TO SERVE");
@@ -107,6 +111,7 @@ public class UnoServer {
 			}
 			catch (Exception e) {
 				UnoGUI.error("Player Disconnected");
+				ph.remove(sock);
 			}
 		}
 	}

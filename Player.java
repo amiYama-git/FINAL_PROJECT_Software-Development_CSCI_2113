@@ -18,6 +18,7 @@ public class Player {
 	private ObjectOutputStream objectToServer;
 	private ObjectInputStream objectFromServer;
 	private int opponent; // number of cards held by the opponent
+	private int plusCards;
   
 	public Player (String host, int port, String name, UnoGUI gui) {
 		this.name = name;
@@ -79,8 +80,13 @@ public class Player {
 		} catch (IOException e) {
 			// error message
 		}
+	}
 
-		printHand();
+	public void multiDrawCard(int num) {
+		while (num != 0) {
+			drawCard();
+			num--;
+		}
 	}
 
 	public void updateStack(Card card) {
@@ -88,7 +94,7 @@ public class Player {
 		char c = card.getCol();
 		int n = card.getNum();
 		gui.updateStack(n + " " + c);
-		// send to the gui
+		// gui.updateStack(card);
 	}
 
 	public void remove(int number, char color) {
@@ -112,31 +118,32 @@ public class Player {
 		catch (Exception e) {}
 	}
 
-	public Card wildCard() {
+	// for making wild cards
+	public Card wildCard(int num) {
 		String [] options = {"red", "yellow", "blue", "green"};
 		int choice = JOptionPane.showOptionDialog(new JFrame(), "Change to which color?", "Wild Card!", 0, 3, null, options, options[0]);
-		Card toSend = new Card(500, 'r');
+		Card toSend = new Card(num, 'r'); // the default
 
 		if (choice == 0) {
-			toSend = new Card(500, 'r');
+			toSend = new Card(num, 'r');
 			toSend.setStatus("played");
 			return toSend;
 		}
 
 		if (choice == 1) {
-			toSend = new Card(500, 'y');
+			toSend = new Card(num, 'y');
 			toSend.setStatus("played");
 			return toSend;
 		}
 
 		if (choice == 2) {
-			toSend = new Card(500, 'b');
+			toSend = new Card(num, 'b');
 			toSend.setStatus("played");
 			return toSend;
 		}
 
 		if (choice == 3) {
-			toSend = new Card(500, 'g');
+			toSend = new Card(num, 'g');
 			toSend.setStatus("played");
 			return toSend;
 		}
@@ -155,7 +162,7 @@ public class Player {
 		if (onStack == null) {
 			// if it's a wild card
 			if (color == 's') {
-				Card toSend = wildCard();
+				Card toSend = wildCard(num);
 				
 				try {
 					objectToServer.writeObject(toSend);
@@ -166,6 +173,10 @@ public class Player {
 
 				// update stack
 				updateStack(toSend);
+
+				if (num == 400) {
+					plusCards += 4;
+				}
 				
 				gui.updatePlayer("PLAYED FIRST TURN: " + toSend.getNum() + " " + toSend.getCol());
 				
@@ -174,13 +185,17 @@ public class Player {
 				// normal card
 				try {
 					objectToServer.writeObject(card);
-				objectToServer.flush();
+					objectToServer.flush();
 				} catch (IOException e) {
 					System.out.println("FAILED TO PLAY FIRST TURN");
 				}
 
 				// update stack
 				updateStack(card);
+
+				if (num == 200) {
+					plusCards += 2;
+				}
 
 				gui.updatePlayer("PLAYED FIRST TURN: " + num + " " + color);
 			}
@@ -193,9 +208,68 @@ public class Player {
 			return true;
 		}
 
+		// potentially stacking on +# cards
+		if (onStack.getNum() == 200 || onStack.getNum() == 400) {
+			// stack with another +2
+			if (num == 200 && color == onStack.getCol()) {
+				// send the card as usual
+				try {
+					objectToServer.writeObject(card);
+					objectToServer.flush();
+				} catch (IOException e) {
+					System.out.println("FAILED TO PLAY MATCHING NUMBER CARD");
+				}
+		
+				// remove from hand
+				remove(num, color);
+		
+				// update stack
+				updateStack(card);
+
+				plusCards += 2;
+			
+				gui.updatePlayer("PLAYED MATCHING NUMBER CARD: " + num + " " + color);
+				printHand();
+		
+				return true;
+			}
+
+			// stack with a +4
+			else if (num == 400) {
+				Card toSend = wildCard(num);
+
+				// send to the server
+				try {
+					objectToServer.writeObject(toSend);
+					objectToServer.flush();
+				} catch (IOException e) {
+					System.out.println("FAILED TO PLAY WILD CARD");
+				}
+ 
+				// remove from hand
+				remove(num, color);
+
+				// update stack
+				updateStack(toSend);
+
+				plusCards += 4;
+
+				gui.updatePlayer("PLAYED WILD CARD: " + toSend.getNum() + " " + toSend.getCol());
+				printHand();
+ 
+				return true;
+			}
+
+			// don't stack, therefore must draw cards; then goes on to play whatever card
+			else {
+				multiDrawCard(plusCards);
+				plusCards = 0; // reset
+			}
+		}
+
 		// wild cards always get played
 		if (color == 's') {
-			Card toSend = wildCard();
+			Card toSend = wildCard(num);
 
 			// send to the server
 			try {
@@ -210,6 +284,10 @@ public class Player {
 
 			// update stack
 			updateStack(toSend);
+
+			if (num == 400) {
+				plusCards += 4;
+			}
 
 			gui.updatePlayer("PLAYED WILD CARD: " + toSend.getNum() + " " + toSend.getCol());
 			printHand();
@@ -231,6 +309,10 @@ public class Player {
 
 			// update stack
 			updateStack(card);
+
+			if (num == 200) {
+				plusCards += 2;
+			}
 
 			gui.updatePlayer("PLAYED MATCHING COLOR CARD: " + num + " " + color);
 			printHand();
@@ -255,7 +337,7 @@ public class Player {
 			updateStack(card);
 			
 			gui.updatePlayer("PLAYED MATCHING NUMBER CARD: " + num + " " + color);
-			printHand();
+			printHand(); // this would be sending the hand to the GUI
 
 			return true;
 		}
@@ -283,6 +365,7 @@ public class Player {
 		if (card.getStatus().equals("drawn")) {
 			hand.add(card);
 			gui.updatePlayer("Drew card: " + card.getNum() + " " + card.getCol());
+			printHand();
 			// send to the gui--send the whole array
 			// gui.updateHand(hand);
 		}
@@ -302,25 +385,30 @@ public class Player {
 			opponent--;
 			gui.updateOpponent("OPPONENT HAS: " + opponent + " cards");
 
+			
 			// draw 4
 			if (card.getNum() == 400) {
-				drawCard();
-				drawCard();
-				drawCard();
-				drawCard();
 				gui.updateOpponent("OPPONENT PLAYED DRAW 4");
+				plusCards += 4;
+
+				gui.updateOpponent("Will have to draw " + plusCards + " cards");
 			}
+
 			// draw 2
 			else if (card.getNum() == 200) {
-				drawCard();
-				drawCard();
 				gui.updateOpponent("OPPONENT PLAYED DRAW 2");
+				plusCards += 2;
+
+				gui.updateOpponent("Will have to draw " + plusCards + " cards");
 			}
+			
+
 			// skip turn
-			else if (card.getNum() == 300) {
+			if (card.getNum() == 300) {
 				// do nothing...?
 				gui.updateOpponent("OPPONENT PLAYED SKIP");
 			}
+			
 			// rotate
 			else if (card.getNum() == 100) {
 				// again, do nothing
@@ -358,6 +446,7 @@ public class Player {
 			try {
 				while(true) {
 					System.out.println("Waiting for card...");
+					System.out.println("May potentially need to draw " + plusCards + " cards");
 					Card card = (Card) objectFromServer.readObject();
 					receiveCard(card);
 				}
