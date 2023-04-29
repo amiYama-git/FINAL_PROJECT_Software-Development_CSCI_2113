@@ -127,6 +127,7 @@ public class UnoServer {
 			catch (Exception e) {
 				UnoGUI.error("Player Disconnected");
 				ph.remove(sock);
+				e.printStackTrace();
 			}
 		}
 	}

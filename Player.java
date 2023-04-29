@@ -14,13 +14,13 @@ public class Player {
 	private static Card onStack;
 	private Socket sock;
 	private String name;
-	private UnoGUI gui;
+	private UnoScreen gui;
 	private ObjectOutputStream objectToServer;
 	private ObjectInputStream objectFromServer;
 	private int opponent; // number of cards held by the opponent
 	private int plusCards;
   
-	public Player (String host, int port, String name, UnoGUI gui) {
+	public Player (String host, int port, String name, UnoScreen gui) {
 		this.name = name;
 		this.gui = gui;
 		  
@@ -33,10 +33,10 @@ public class Player {
 		}
 		catch (Exception e) {
 			// error pop-up/message
-			JFrame error = new JFrame();
-			JOptionPane.showMessageDialog(error, "Failed to Connect", "Connection Error", JOptionPane.ERROR_MESSAGE);
-			error.setVisible(true);
+			UnoGUI.error("Failed to connect");
 		}
+
+		hand.add(new Card(500, 's'));
 
 		// at the start of the game, both players will have 7 cards
 		opponent = 7;
@@ -79,6 +79,7 @@ public class Player {
 			objectToServer.flush();
 		} catch (IOException e) {
 			// error message
+			UnoGUI.error("Failed to draw card");
 		}
 	}
 
@@ -87,14 +88,6 @@ public class Player {
 			drawCard();
 			num--;
 		}
-	}
-
-	public void updateStack(Card card) {
-		onStack = card;
-		char c = card.getCol();
-		int n = card.getNum();
-		gui.updateStack(n + " " + c);
-		// gui.updateStack(card);
 	}
 
 	public void remove(int number, char color) {
@@ -107,6 +100,8 @@ public class Player {
 				break;
 			}
 		}
+
+		gui.cardarray(hand);
 	}
 
 	public void disconnect() {
@@ -121,7 +116,7 @@ public class Player {
 	// for making wild cards
 	public Card wildCard(int num) {
 		String [] options = {"red", "yellow", "blue", "green"};
-		int choice = JOptionPane.showOptionDialog(new JFrame(), "Change to which color?", "Wild Card!", 0, 3, null, options, options[0]);
+		int choice = gui.colorpicker();
 		Card toSend = new Card(num, 'r'); // the default
 
 		if (choice == 0) {
@@ -153,8 +148,6 @@ public class Player {
 
 	// triggered by the GUI, play a card
 	public boolean playCard(int num, char color) {
-		gui.updatePlayer("Trying to play: " + num + " " + color);
-
 		Card card = new Card(num, color);
 		card.setStatus("played");
 
@@ -168,18 +161,16 @@ public class Player {
 					objectToServer.writeObject(toSend);
 					objectToServer.flush();
 				} catch (IOException e) {
-					System.out.println("FAILED TO PLAY FIRST TURN");
+					UnoGUI.error("FAILED TO PLAY FIRST TURN");
 				}
 
 				// update stack
-				updateStack(toSend);
+				onStack = toSend;
+				gui.updateStack(card);
 
 				if (num == 400) {
 					plusCards += 4;
 				}
-				
-				gui.updatePlayer("PLAYED FIRST TURN: " + toSend.getNum() + " " + toSend.getCol());
-				
 			}
 			else {
 				// normal card
@@ -187,23 +178,22 @@ public class Player {
 					objectToServer.writeObject(card);
 					objectToServer.flush();
 				} catch (IOException e) {
-					System.out.println("FAILED TO PLAY FIRST TURN");
+					UnoGUI.error("FAILED TO PLAY FIRST TURN");
 				}
 
 				// update stack
-				updateStack(card);
+				onStack = card;
+				gui.updateStack(card);
 
 				if (num == 200) {
 					plusCards += 2;
 				}
-
-				gui.updatePlayer("PLAYED FIRST TURN: " + num + " " + color);
 			}
 
 			// remove from hand
 			remove(num, color);
 
-			printHand();
+			gui.cardarray(hand);
 
 			return true;
 		}
@@ -217,19 +207,19 @@ public class Player {
 					objectToServer.writeObject(card);
 					objectToServer.flush();
 				} catch (IOException e) {
-					System.out.println("FAILED TO PLAY MATCHING NUMBER CARD");
+					UnoGUI.error("FAILED TO PLAY MATCHING NUMBER CARD");
 				}
 		
 				// remove from hand
 				remove(num, color);
 		
 				// update stack
-				updateStack(card);
+				onStack = card;
+				gui.updateStack(card);
 
 				plusCards += 2;
-			
-				gui.updatePlayer("PLAYED MATCHING NUMBER CARD: " + num + " " + color);
-				printHand();
+
+				gui.cardarray(hand);
 		
 				return true;
 			}
@@ -243,19 +233,19 @@ public class Player {
 					objectToServer.writeObject(toSend);
 					objectToServer.flush();
 				} catch (IOException e) {
-					System.out.println("FAILED TO PLAY WILD CARD");
+					UnoGUI.error("FAILED TO PLAY WILD CARD");
 				}
  
 				// remove from hand
 				remove(num, color);
 
 				// update stack
-				updateStack(toSend);
+				onStack = toSend;
+				gui.updateStack(card);
 
 				plusCards += 4;
 
-				gui.updatePlayer("PLAYED WILD CARD: " + toSend.getNum() + " " + toSend.getCol());
-				printHand();
+				gui.cardarray(hand);
  
 				return true;
 			}
@@ -283,14 +273,14 @@ public class Player {
 			remove(num, color);
 
 			// update stack
-			updateStack(toSend);
+			onStack = toSend;
+			gui.updateStack(card);
 
 			if (num == 400) {
 				plusCards += 4;
 			}
 
-			gui.updatePlayer("PLAYED WILD CARD: " + toSend.getNum() + " " + toSend.getCol());
-			printHand();
+			gui.cardarray(hand);
  
 			return true;
 		}
@@ -301,21 +291,21 @@ public class Player {
 				objectToServer.writeObject(card);
 				objectToServer.flush();
 			} catch (IOException e) {
-				System.out.println("FAILED TO PLAY MATCHING COLOR CARD");
+				UnoGUI.error("FAILED TO PLAY MATCHING COLOR CARD");
 			}
  
 			// remove from hand
 			remove(num, color);
 
 			// update stack
-			updateStack(card);
+			onStack = card;
+			gui.updateStack(card);
 
 			if (num == 200) {
 				plusCards += 2;
 			}
 
-			gui.updatePlayer("PLAYED MATCHING COLOR CARD: " + num + " " + color);
-			printHand();
+			gui.cardarray(hand);
  
 			return true;
 		}
@@ -327,24 +317,23 @@ public class Player {
 				objectToServer.writeObject(card);
 				objectToServer.flush();
 			} catch (IOException e) {
-				System.out.println("FAILED TO PLAY MATCHING NUMBER CARD");
+				UnoGUI.error("FAILED TO PLAY MATCHING NUMBER CARD");
 			}
  
 			// remove from hand
 			remove(num, color);
 
 			// update stack
-			updateStack(card);
+			onStack = card;
+			gui.updateStack(card);
 			
-			gui.updatePlayer("PLAYED MATCHING NUMBER CARD: " + num + " " + color);
-			printHand(); // this would be sending the hand to the GUI
+			gui.cardarray(hand);
 
 			return true;
 		}
   
 		else {
-			gui.updatePlayer("CARD COULD NOT BE PLAYED -- NO ERROR BESIDES PLAYER JUDGEMENT");
-			// pop-up telling the player that card isn't playable?
+			UnoGUI.error("CARD CANNOT BE PLAYED");
 			return false;
 		}
 	}
@@ -355,7 +344,7 @@ public class Player {
 			objectToServer.writeObject(card);
 			objectToServer.flush();
 		} catch (IOException e) {
-			System.out.println("FAILED TO PLAY CARD");
+			UnoGUI.error("FAILED TO PLAY CARD SERVERSIDE");
 		}
 	}
 
@@ -382,55 +371,53 @@ public class Player {
 
 		if (card.getStatus().equals("drawn")) {
 			hand.add(card);
-			gui.updatePlayer("Drew card: " + card.getNum() + " " + card.getCol());
-			printHand();
-			// send to the gui--send the whole array
-			// gui.updateHand(hand);
+			gui.cardarray(hand);
 		}
 		// opponent has drawn a card--update their hand count
 		else if (card.getStatus().equals("update")) {
 			opponent++;
-			gui.updateOpponent("OPPONENT HAS: " + opponent + " cards");
-			// tell the gui!
-			
+			gui.updateOpponent(opponent);
 		}
 		// opponent played a card--update stack and do whatever else may be required
 		else if (card.getStatus().equals("played")) {
 			// update stack
-			updateStack(card);
+			onStack = card;
+
+			if (card.getNum() == 400) {
+				gui.updateStack(new Card(400, 's'));
+			}
+			else if (card.getNum() == 500) {
+				gui.updateStack(new Card(500, 's'));
+			}
+			else {
+				gui.updateStack(card);
+			}
 
 			// update opponent
 			opponent--;
-			gui.updateOpponent("OPPONENT HAS: " + opponent + " cards");
+			gui.updateOpponent(opponent);
 
 			
 			// draw 4
 			if (card.getNum() == 400) {
-				gui.updateOpponent("OPPONENT PLAYED DRAW 4");
 				plusCards += 4;
-
-				gui.updateOpponent("Will have to draw " + plusCards + " cards");
 			}
 
 			// draw 2
 			else if (card.getNum() == 200) {
-				gui.updateOpponent("OPPONENT PLAYED DRAW 2");
 				plusCards += 2;
-
-				gui.updateOpponent("Will have to draw " + plusCards + " cards");
 			}
-			
 
 			// skip turn
 			if (card.getNum() == 300) {
 				// do nothing...?
-				gui.updateOpponent("OPPONENT PLAYED SKIP");
+				UnoGUI.error("TURN SKIPPED!");
 			}
 			
 			// rotate
 			else if (card.getNum() == 100) {
 				// again, do nothing
-				gui.updateOpponent("OPPONENT PLAYED ROTATE");
+				UnoGUI.error("ROTATE!");
 			}
 		}
 	}
@@ -473,6 +460,7 @@ public class Player {
 	// listens for Card objects from the server
 	private class listeningThread extends Thread {
 		private Socket sock;
+		private boolean firstTurn = true;
 		  
 		public listeningThread (Socket sock) {
 			this.sock = sock;
@@ -494,6 +482,11 @@ public class Player {
 		public void run() {
 			try {
 				while(true) {
+					if (firstTurn && hand.size() == 7) {
+						gui.updateOpponent(opponent);
+						firstTurn = false;
+					}
+
 					System.out.println("Waiting for card...");
 					System.out.println("May potentially need to draw " + plusCards + " cards");
 					Card card = (Card) objectFromServer.readObject();
@@ -502,28 +495,10 @@ public class Player {
 			}
 			catch (Exception e) {
 				System.out.println("DISCONNECTED");
-				e.printStackTrace();
+				System.exit(1);
+
 			}
 		}
-	} 
-
-	public void printHand() {
-		gui.clearHand();
-
-		for (int i = 0; i < hand.size(); i++) {
-			gui.updateHand(hand.get(i).getNum() + " " + hand.get(i).getCol());
-		}
-	}
- 
-	public static void main(String[] args) {
-		// TESTING--THIS WILL BE DELETED
-		Player player = new Player("localhost", 8181, "TESTER", null);
-
-		player.playCard(1, 'r'); // first turn check
-		player.playCard(1, 'y'); // matching number check
-		player.playCard(5, 'y'); // matching color check
-		player.playCard(500, 's'); // wild card check
-
 	}
 }
  
