@@ -448,7 +448,7 @@ public class Player {
 			// Sets the Card's Status to "UNO!"
 			uno = new Card (1, 'U');
 			uno.setStatus("Uno!");
-			unoPopup = new UnoPopup('U', 2);
+			unoPopup = new UnoPopup('U', 1);
 		} else {
 			// Sets the Card's Status to "UNO?"
 			uno = new Card (2, 'U');
