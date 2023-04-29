@@ -1,6 +1,8 @@
 /*
  * Equivalent of client
  * Will store: card on top of deck, their own hand, how many cards the opponent has, their own name
+ * 
+ * NEED A draw button, way to delete cards from the hand when they're played
 */
 
 import java.io.*;
@@ -35,8 +37,6 @@ public class Player {
 			// error pop-up/message
 			UnoGUI.error("Failed to connect");
 		}
-
-		hand.add(new Card(500, 's'));
 
 		// at the start of the game, both players will have 7 cards
 		opponent = 7;
@@ -100,8 +100,6 @@ public class Player {
 				break;
 			}
 		}
-
-		gui.cardarray(hand);
 	}
 
 	public void disconnect() {
@@ -116,7 +114,7 @@ public class Player {
 	// for making wild cards
 	public Card wildCard(int num) {
 		String [] options = {"red", "yellow", "blue", "green"};
-		int choice = gui.colorpicker();
+		int choice = JOptionPane.showOptionDialog(new JFrame(), "Change to which color?", "Wild Card!", 0, 3, null, options, options[0]);
 		Card toSend = new Card(num, 'r'); // the default
 
 		if (choice == 0) {
@@ -192,7 +190,6 @@ public class Player {
 
 			// remove from hand
 			remove(num, color);
-
 			gui.cardarray(hand);
 
 			return true;
@@ -210,15 +207,14 @@ public class Player {
 					UnoGUI.error("FAILED TO PLAY MATCHING NUMBER CARD");
 				}
 		
-				// remove from hand
-				remove(num, color);
-		
 				// update stack
 				onStack = card;
 				gui.updateStack(card);
 
 				plusCards += 2;
 
+				// remove from hand
+				remove(num, color);
 				gui.cardarray(hand);
 		
 				return true;
@@ -351,24 +347,6 @@ public class Player {
 	// used to differentiate the types of cards the client can recieve from the server
 	public void receiveCard(Card card) {
 		// drew a card--add it to the hand
-
-
-		// If it recieves Uno Card, plays UNO GUI
-		if (card.getStatus().equals("Uno!")) {
-		
-			Thread unoPopup = new UnoPopup('U', 1);
-        		unoPopup.start();
-	
-		}
-		
-		// If it recieves the Fail Uno Card, it plays the Fail Uno GUI
-		if (card.getStatus().equals("Uno?")) {
-			
-		        Thread unoPopup = new UnoPopup('U', 2);
-	        	unoPopup.start();
-		}
-
-
 		if (card.getStatus().equals("drawn")) {
 			hand.add(card);
 			gui.cardarray(hand);
@@ -421,42 +399,11 @@ public class Player {
 			}
 		}
 	}
+
+	// thoughts on UNO button: we need to listen to it from both sides, so what if it's a static object across all guis?
+	// then thread it in the server (idk how it gets to the server, maybe the player will send it) so it exists on both guis
+	// as the same button with the same thread?
   
-	// When UNO Button is Pressed
-	// If this player has UNO, then "Uno!" is send to server. If not, then "Uno?" is sent to server
- 	public void uno() {
-
-		// Creates a Fake Card to send Message to Server
-		Card uno;
-		Thread unoPopup;
-
- 		// Checks if the player has UNO
- 		if (getHandSize() == 1) {		
-			// Sets the Card's Status to "UNO!"
-			uno = new Card (1, 'U');
-			uno.setStatus("Uno!");
-			unoPopup = new UnoPopup('U', 1);
-		} else {
-			// Sets the Card's Status to "UNO?"
-			uno = new Card (2, 'U');
-			uno.setStatus("Uno?");
-			unoPopup = new UnoPopup('U', 2);
-		}
-
-		unoPopup.start();
-
-                // Sends the Card to the Server
-                try {   
-                         objectToServer.writeObject(uno);
-                         objectToServer.flush();
-                } catch (IOException e) {
-                         System.out.println("UNO FAILURE");
-                }
-
- 		// If This player doesn't have Uno, Sends UNO Message to Server and Server Determines if the other player has UNO
- 		// If noone has UNO, then this player picks two cards. If the other player has UNO, then they pick two cards
- 	}
-
 	// listens for Card objects from the server
 	private class listeningThread extends Thread {
 		private Socket sock;
