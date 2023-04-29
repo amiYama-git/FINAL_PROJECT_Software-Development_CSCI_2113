@@ -34,10 +34,7 @@ public class UnoGUI_copy {
                  }
 
 		// if UNO Button is Pressed
-		if (player.uno() == true) {
-			// UNO Popup plays
-		} 
-		// If other player has UNO or if no-one has UNO, it is handled by the player class
+		player.uno();
 	}
 }
 
