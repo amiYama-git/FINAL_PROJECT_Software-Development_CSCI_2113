@@ -22,11 +22,21 @@ public class Popup extends Thread  {
 	// To determine what Image Pops Up
         private char col;
 	private int num;
+	protected int xCord;
+	protected int yCord;
+	protected int xLen;
+	protected int yLen;
+	protected int runTime;
 
         // Thread Constructor
         public Popup (char col, int num) {
                 this.col = col;
 		this.num = num;
+		this.xCord = 550;
+		this.yCord = 250;
+		this.xLen = 230;
+		this.yLen = 350;
+		this.runTime = 3500;
         }
 		
 	// Shows for a couple of second before deleting itself
@@ -37,11 +47,11 @@ public class Popup extends Thread  {
                 pop.setUndecorated(true);
 
 		// Makes a Square
-		pop.setSize(230, 350);
+		pop.setSize(xLen, yLen);
 
 		// Puts it in the Middle
 		// Will this be relative based on size of computer screen? If so we may need it to pass where the Draw / Place pile is on the main GUI?
-		pop.setLocation(550, 250);	
+		pop.setLocation(xCord, yCord);	
 
 		// Makes String for calling the GIF from file
 		String type = "special_gifs/" + col + "_" + num + ".gif";
@@ -81,7 +91,7 @@ public class Popup extends Thread  {
 
 		// Waits three seconds
 		try {
-			sleep(3000);
+			sleep(runTime);
 		} catch (Exception e) {
 			System.out.println("Popup Failed");
 		}
