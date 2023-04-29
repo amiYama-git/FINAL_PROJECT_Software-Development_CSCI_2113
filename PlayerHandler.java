@@ -22,6 +22,8 @@ public class PlayerHandler {
 				break;
 			}
 		}
+
+		System.out.println("Removed from playerhandler; there are " + players.size() + " players");
 	}
 
 	// send a card to the opponent
