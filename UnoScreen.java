@@ -6,6 +6,7 @@ import java.util.*;
 public class UnoScreen extends UnoGUI { //the actual playing screen
 	private Player player;
 	private int toReturn = 5;
+	JLabel currentCol = new JLabel();
 
 	//just make the frame and panels
 	public UnoScreen (String ip, int host, String name){
@@ -15,22 +16,33 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 		frame.setLayout(null);
 		frame.setVisible(true);
 
-		yourside.setBounds(0, 0, 500, 240);
+		yourside.setBounds(0, 0, 900, 240);
 		stackpanel.setBounds(0, 270, 500, 190);
 		addstack.setBounds(0,0, 80, 110);//same as card size
 		stackpanel.add(addstack);
-		mysidepanel.setBounds(0, 490, 500, 190);//240 690
+		mysidepanel.setBounds(0, 490, 900, 190);//240 690
 		unobuttonpanel.setBounds(0, 640, 500, 40);
 
 		JButton unobutton = new JButton("UNO");
 			unobutton.addActionListener(unoclick -> {
 			System.out.println("uno clicked");
-			// player.uno();
+			player.uno();
 		});
 		
 		unobutton.setPreferredSize(new Dimension(60, 40));
 		unobutton.setBounds(150, 8, 200, 24);
 		unobuttonpanel.add(unobutton);
+
+		JButton drawButton = new JButton("Draw");
+		drawButton.addActionListener((e) -> {
+			player.drawCard();
+		});
+		drawButton.setPreferredSize(new Dimension(60, 40));
+		drawButton.setBounds(250, 8, 200, 24);
+		unobuttonpanel.add(drawButton);
+
+		currentCol.setBounds(400, 8, 200, 24);
+		mysidepanel.add(currentCol);
 
 		frame.add(yourside);
 		frame.add(stackpanel);
@@ -59,6 +71,8 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 			yourside.add(button);
 			
 		}
+
+		yourside.validate();
 	}
 
 	public void updateStack(Card card){
@@ -67,6 +81,7 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 			dabIcon = addimage(card);
 			addstack.setIcon(dabIcon);//adding a imageicon
 			System.out.println("stack updated");
+			currentCol.setText("Color: " + card.getCol());
 		}
 		catch(Exception e){
 			System.out.println("image cannot be found");
@@ -76,6 +91,10 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 	/***************************************************************************/
 
 	public void cardarray(ArrayList<Card> hand){
+		System.out.println("IN CARDARRAY");
+
+		mysidepanel.removeAll();
+
 		cards.clear();
 		
 		//break card array
@@ -83,7 +102,10 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 			cards.add(hand.get(i));
 			ImageIcon dabIcon = addimage(hand.get(i));
 			addfunc(dabIcon, hand.get(i));
-		}  
+		}
+
+		System.out.println("HAND CONTAINS: " + cards.size() + " cards");
+		System.out.println("LAYERED PANE CONTAINS: " + mysidepanel.getComponentCount() + " things");
 	}
 
 	public void addfunc(ImageIcon dabIcon, Card onecard){
@@ -99,7 +121,7 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 		public void actionPerformed(ActionEvent e){
 			char color = onecard.getCol();
 			int num = onecard.getNum();
-			/*
+			
 			if(num > 9){
 			   Thread popup = new Popup(color, num);
 			  popup.start();
@@ -108,12 +130,9 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 			boolean stop = false;
 
 			remove = false;
-			*/
-			if(!player.playCard(num, color)){ // == true  issue is here
-				UnoGUI.error("Failed to play card");
-			}
-			else {
-				
+			
+			if (player.playCard(num, color)) {
+				mysidepanel.remove(button);
 			}
 		}
 		});
