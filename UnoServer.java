@@ -107,6 +107,19 @@ public class UnoServer {
 						System.out.println("SENDING A PLAYED CARD");
 						ph.sendCard(sock, temp);
 					}
+					// If the Player has Uno
+ 					if (status.equals("Uno!")) {
+ 						// Tells Player Handler to Send all Players the UNO Card
+ 						System.out.println("WE'VE GOT AN UNO");
+ 						ph.sendCard(sock, temp);
+ 					} 
+
+ 					// If the Player is asking the Server whether others have an UNO
+ 					if (status.equals("Uno?")) {
+ 						// Lets the Player Handler Know, which checks for UNOs among the other players. 
+ 						System.out.println("CHECKING FOR UNOS");
+ 						ph.uno(sock, temp);
+ 					}
 				}
 			}
 			catch (Exception e) {

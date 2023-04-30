@@ -65,5 +65,47 @@ public class PlayerHandler {
 			}
 		}
 	}
+
+	// Checks if any of the other players have UNO
+ 	public void uno (Socket sender, Card card) {
+                 Iterator<Player> iterator = players.iterator();
+
+ 		boolean unoFail = false;
+ 		// Checks if any of the other players have uno
+                 while (iterator.hasNext()) {
+                         Player temp = iterator.next();
+
+ 			// If they have uno
+                         if (temp.getHandSize() == 1) {
+
+ 				// Sets status to UNO 
+ 				card.setStatus("Uno!");
+
+ 				// Makes that player draw two cards
+ 			        temp.drawCard();
+ 				temp.drawCard();				
+
+                                 // Sets unoFail to true
+ 				unoFail = true;
+                         }
+                 }
+
+ 		// If noone else has uno, then the person who pressed the Button has to draw two cards
+ 		if (unoFail == false) {
+ 			// Sender draws two cards
+ 			iterator = players.iterator();
+ 			while (iterator.hasNext()) {
+ 				Player temp = iterator.next();
+ 				if (temp.getSocket().equals(sender)) {
+ 					temp.drawCard();
+ 					temp.drawCard();
+ 					break;
+ 				}
+ 			}
+ 		}
+
+ 		// Sends Card back to everyone
+ 		sendCard(sender, card); 
+ 	}
 	
 }
