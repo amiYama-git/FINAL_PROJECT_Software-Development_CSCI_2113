@@ -192,6 +192,7 @@ public class Player {
 			remove(num, color);
 			gui.cardarray(hand);
 
+			isEnd();
 			return true;
 		}
 
@@ -217,6 +218,7 @@ public class Player {
 				remove(num, color);
 				gui.cardarray(hand);
 		
+				isEnd();
 				return true;
 			}
 
@@ -242,7 +244,8 @@ public class Player {
 				plusCards += 4;
 
 				gui.cardarray(hand);
- 
+ 				
+				isEnd();
 				return true;
 			}
 
@@ -278,6 +281,7 @@ public class Player {
 
 			gui.cardarray(hand);
  
+			isEnd();
 			return true;
 		}
   
@@ -302,7 +306,7 @@ public class Player {
 			}
 
 			gui.cardarray(hand);
- 
+ 			isEnd();
 			return true;
 		}
   
@@ -324,6 +328,8 @@ public class Player {
 			gui.updateStack(card);
 			
 			gui.cardarray(hand);
+			
+			isEnd();
 
 			return true;
 		}
@@ -332,6 +338,15 @@ public class Player {
 			UnoGUI.error("CARD CANNOT BE PLAYED");
 			return false;
 		}
+	}
+
+	// Ends the Game
+	public void isEnd() {
+                // If Hand is 0, Ends the Game
+                if (hand.size() == 0) {
+                        GameEnd end = new GameEnd('W');
+			end.setVisible(true);
+                }
 	}
 
 	// used server-side to send things to players client-side

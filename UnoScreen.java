@@ -71,8 +71,14 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 			yourside.add(button);
 			
 		}
-
+		
 		yourside.validate();
+
+		// If opponent has 0 cards, Ends Game
+		if (numcards == 0) {
+			GameEnd end = new GameEnd('L');
+			end.setVisible(true);
+		}
 	}
 
 	public void updateStack(Card card){
