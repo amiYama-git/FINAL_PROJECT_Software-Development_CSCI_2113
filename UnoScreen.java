@@ -106,6 +106,10 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 
 		System.out.println("HAND CONTAINS: " + cards.size() + " cards");
 		System.out.println("LAYERED PANE CONTAINS: " + mysidepanel.getComponentCount() + " things");
+		
+		frame.invalidate();
+		frame.validate();
+		frame.repaint();
 	}
 
 	public void addfunc(ImageIcon dabIcon, Card onecard){
