@@ -72,7 +72,9 @@ public class UnoScreen extends UnoGUI { //the actual playing screen
 			
 		}
 		
+		yourside.invalidate();
 		yourside.validate();
+		yourside.repaint();
 
 		// If opponent has 0 cards, Ends Game
 		if (numcards == 0) {
